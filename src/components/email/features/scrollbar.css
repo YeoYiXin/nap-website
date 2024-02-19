@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Define scrollbar width and color */
+.display-email-scrollbar::-webkit-scrollbar {
+    width: 8px; /* Adjust as needed */
+  }
+  
+  /* Track */
+  .display-email-scrollbar::-webkit-scrollbar-track {
+    background: #f1f1f1; /* Light grey */
+  }
+  
+  /* Handle */
+  .display-email-scrollbar::-webkit-scrollbar-thumb {
+    background: #888; /* Grey */
+    border-radius: 10px; /* Rounder corners */
+  }
+  
+  /* Handle on hover */
+  .display-email-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #555; /* Darker grey */
+  }
