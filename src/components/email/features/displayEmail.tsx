@@ -6,21 +6,26 @@ import DeleteButton from "../buttons/display_email/deleteButton";
 import InProgressButton from "../buttons/display_email/inProgressButton";
 import DoneButton from "../buttons/display_email/done";
 import { LuDot } from "react-icons/lu";
+import { db } from "../../../firebase/clientApp";
 import "./scrollbar.css";
+import { doc, getDoc } from "firebase/firestore";
 
 interface Props {
   selectedEmail: {
-    workOrderId: string;
-    title: string;
-    submissionUser: string;
-    timestamp: string;
+    date: string;
+    pIndoorLocation: string;
     problemClass: string;
-    subclass: string;
-    location: string;
-    priority: string;
-    status: string;
-    department: string;
-    description: string;
+    problemDepartment: string;
+    problemDescription: string;
+    problemId: string;
+    problemImageURL: string;
+    problemLocation: string;
+    problemPriority: string;
+    problemReportNum: number;
+    problemStatus: string;
+    problemSubClass: string;
+    problemTitle: string;
+    uid: string;
   } | null;
 }
 
@@ -29,25 +34,50 @@ const DisplayEmail = ({ selectedEmail }: Props) => {
 
   const [prio, setPrio] = useState<string | null>(null);
 
-  //   const [assigned, setAssigned] = useState<string | null>(null);
+  const [submissionUserEmail, setSubmissionUserEmail] = useState<string | null>(
+    null
+  );
 
   useEffect(() => {
     if (selectedEmail) {
-      setStat(selectedEmail.status);
+      setStat(selectedEmail.problemStatus);
+      setPrio(selectedEmail.problemPriority);
+
+      // Fetch submission user's email
+      fetchSubmissionUserEmail(selectedEmail.uid);
+    }
+  }, [selectedEmail]);
+
+  const fetchSubmissionUserEmail = async (uid: string) => {
+    const docRef = doc(db, "users", uid);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      // setSubmissionUserEmail(docSnap.data().email);
+
+      const userData = docSnap.data();
+      if (userData && userData.email) {
+        const emailParts = userData.email.split("@");
+        if (emailParts.length > 0) {
+          setSubmissionUserEmail(emailParts[0]); // Get the part before the "@" symbol
+        }
+      }
+    } else {
+      console.log("No such document!");
+    }
+  };
+
+  useEffect(() => {
+    if (selectedEmail) {
+      setStat(selectedEmail.problemStatus);
     }
   }, [selectedEmail]);
 
   useEffect(() => {
     if (selectedEmail) {
-      setPrio(selectedEmail.priority);
+      setPrio(selectedEmail.problemPriority);
     }
   }, [selectedEmail]);
-
-  //   useEffect(() => {
-  //     if (selectedEmail) {
-  //       setAssigned(selectedEmail.department);
-  //     }
-  //   }, [selectedEmail]);
 
   const handleStatusClick = (status: string) => {
     setStat(status);
@@ -72,13 +102,15 @@ const DisplayEmail = ({ selectedEmail }: Props) => {
 
   return (
     <div className="w-[850px] h-full border-2 border-gray-400 border-opacity-30 rounded-sm flex flex-col flex-grow">
-      <div className="flex flex-row h-[10%] items-center px-3 border-b-2 border-b-gray-400 border-opacity-30">
+      <div className="w-[850px] flex flex-row h-[10%] items-center px-3 border-b-2 border-b-gray-400 border-opacity-30">
         {selectedEmail && (
           <>
             <div className="flex-1">
-              <h2 className="font-bold text-lg">{selectedEmail.title}</h2>
+              <h2 className="font-bold text-lg">
+                {selectedEmail.problemTitle}
+              </h2>
             </div>
-            <div className="flex-1 flex flex-row-reverse gap-5 pr-5">
+            <div className="flex flex-row-reverse justify-end gap-5 pr-5">
               {/* edit (problem summarisation) */}
 
               <div className="">
@@ -139,7 +171,7 @@ const DisplayEmail = ({ selectedEmail }: Props) => {
                     <p className="font-bold">Problem</p>
                   </div>
                   <div className="px-5 flex flex-row items-start justify-center">
-                    {selectedEmail.subclass}
+                    {selectedEmail.problemSubClass}
                   </div>
                 </div>
 
@@ -149,7 +181,7 @@ const DisplayEmail = ({ selectedEmail }: Props) => {
                   </div>
                   <div className="px-2 flex flex-row items-start justify-center">
                     <LuDot className={dotColor} />
-                    {selectedEmail.priority}
+                    {selectedEmail.problemPriority}
                   </div>
                 </div>
 
@@ -158,7 +190,7 @@ const DisplayEmail = ({ selectedEmail }: Props) => {
                     <p className="font-bold">Work Order ID</p>
                   </div>
                   <div className="px-5 flex flex-row items-start justify-center">
-                    {selectedEmail.workOrderId}
+                    {selectedEmail.problemId}
                   </div>
                 </div>
               </div>
@@ -170,12 +202,13 @@ const DisplayEmail = ({ selectedEmail }: Props) => {
                   <p className="font-bold">Assigned To{": "}</p>
                 </div>
                 <div className="px-5 flex flex-row items-start justify-center">
-                  {selectedEmail.department.toLowerCase() === "not assigned" ? (
+                  {selectedEmail.problemDepartment.toLowerCase() ===
+                  "not assigned" ? (
                     <span className="px-2 bg-red-500">
-                      {selectedEmail.department}
+                      {selectedEmail.problemDepartment}
                     </span>
                   ) : (
-                    <span>{selectedEmail.department}</span>
+                    <span>{selectedEmail.problemDepartment}</span>
                   )}
                 </div>
               </div>
@@ -184,7 +217,7 @@ const DisplayEmail = ({ selectedEmail }: Props) => {
                   <p className="font-bold">Submitted By{": "}</p>
                 </div>
                 <div className="px-5 flex flex-row items-start justify-center">
-                  {selectedEmail.submissionUser}
+                  {submissionUserEmail}
                 </div>
               </div>
               <div className="flex flex-row">
@@ -192,7 +225,7 @@ const DisplayEmail = ({ selectedEmail }: Props) => {
                   <p className="font-bold">Time{": "}</p>
                 </div>
                 <div className="px-5 flex flex-row items-start justify-center">
-                  {selectedEmail.timestamp}
+                  {selectedEmail.date}
                 </div>
               </div>
             </div>
@@ -202,15 +235,26 @@ const DisplayEmail = ({ selectedEmail }: Props) => {
                 <div>
                   <p className="font-bold">Description</p>
                 </div>
-                <div>{selectedEmail.description}</div>
+                <div>{selectedEmail.problemDescription}</div>
               </div>
 
               <div className="flex flex-row gap-2">
                 <div className="flex-1 flex flex-col border-r-2 border-gray-400 border-opacity-30">
                   <div>
-                    <p className="font-bold">Problem Image</p>
+                    <p className="font-bold mb-3">Problem Image</p>
                   </div>
-                  <div>{"--"}Problem Image</div>
+                  <div>
+                    {selectedEmail.problemImageURL ? (
+                      <img
+                        src={selectedEmail.problemImageURL}
+                        alt="Problem"
+                        className="max-w-[80%] h-auto"
+                      />
+                    ) : (
+                      <p>No image available</p>
+                    )}
+                  </div>{" "}
+                  {/**display image */}
                 </div>
                 <div className="flex-1 flex flex-col">
                   <div>
@@ -226,7 +270,10 @@ const DisplayEmail = ({ selectedEmail }: Props) => {
                 <div>
                   <p className="font-bold">Location</p>
                 </div>
-                <div>{selectedEmail.location}</div>
+                <div>
+                  {selectedEmail.pIndoorLocation},{" "}
+                  {selectedEmail.problemLocation}
+                </div>
                 <div>{"--"}Location Image</div>
               </div>
             </div>
