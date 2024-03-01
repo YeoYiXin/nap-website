@@ -1,7 +1,6 @@
 "use client";
 import React, { useState } from "react";
 import SearchBox from "./features/searchBox";
-import NewWorkOrder from "./buttons/newWorkOrder";
 import AssignedToButton from "./buttons/assignedTo";
 import PriorityButton from "./buttons/priority";
 import ProblemClassButton from "./buttons/problemClass";
@@ -10,25 +9,28 @@ import LocationButton from "./buttons/location";
 import ReceiveEmails from "./features/receiveEmails";
 import DisplayEmail from "./features/displayEmail";
 
-interface Email {
-    workOrderId: string;
-    title: string;
-    submissionUser: string;
-    timestamp: string;
-    problemClass: string;
-    subclass: string;
-    location: string;
-    priority: string;
-    status: string;
-    department: string;
-    description: string;
-  }
+interface FirestoreEmail {
+  date: string;
+  pIndoorLocation: string;
+  problemClass: string;
+  problemDepartment: string;
+  problemDescription: string;
+  problemId: string;
+  problemImageURL: string;
+  problemLocation: string;
+  problemPriority: string;
+  problemReportNum: number;
+  problemStatus: string;
+  problemSubClass: string;
+  problemTitle: string;
+  uid: string;
+}
 
 const mainEmail = () => {
   const [selectedEmail, setSelectedEmail] =
-    useState<Email | null>(null);
+    useState<FirestoreEmail | null>(null);
 
-  const handleEmailClick = (email: Email) => {
+  const handleEmailClick = (email: FirestoreEmail) => {
     setSelectedEmail(email);
   };
   return (
@@ -42,9 +44,6 @@ const mainEmail = () => {
             <h1 className="ml-2 mt-2 font-bold text-xl">Work Orders</h1>
           </div>
           <div className="row-span-1 flex flex-row-reverse gap-2  pr-5 pt-2">
-            <div>
-              <NewWorkOrder />
-            </div>
             <div>
               <SearchBox />
             </div>

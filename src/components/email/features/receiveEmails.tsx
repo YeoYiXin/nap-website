@@ -4,21 +4,37 @@ import { LuDot } from "react-icons/lu";
 import DummyEmail from "./dummyEmail";
 
 interface Props {
-  onEmailClick: (email: Email) => void;
+  onEmailClick: (email: FirestoreEmail) => void;
 }
 
-interface Email {
-  workOrderId: string;
-  title: string;
-  submissionUser: string;
-  timestamp: string;
+// interface Email {
+//   workOrderId: string;
+//   title: string;
+//   submissionUser: string;
+//   timestamp: string;
+//   problemClass: string;
+//   subclass: string;
+//   location: string;
+//   priority: string;
+//   status: string;
+//   department:string;
+//   description: string;
+// }
+interface FirestoreEmail {
+  date: string;
+  pIndoorLocation: string;
   problemClass: string;
-  subclass: string;
-  location: string;
-  priority: string;
-  status: string;
-  department:string;
-  description: string;
+  problemDepartment: string;
+  problemDescription: string;
+  problemId: string;
+  problemImageURL: string;
+  problemLocation: string;
+  problemPriority: string;
+  problemReportNum: number;
+  problemStatus: string;
+  problemSubClass: string;
+  problemTitle: string;
+  uid: string;
 }
 
 const ReceiveEmails = ({ onEmailClick }: Props) => {

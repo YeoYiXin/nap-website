@@ -1,49 +1,84 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import UserProfile from "../../../../public/userProfile.png";
 import { LuDot } from "react-icons/lu";
 import { IoChevronDownOutline } from "react-icons/io5";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/firebase/clientApp";
 
 interface Props {
-  workOrderId: string;
-  title: string;
-  submissionUser: string;
-  timestamp: string;
+  date: string;
+  pIndoorLocation: string;
   problemClass: string;
-  subclass: string;
-  location: string;
-  priority: string;
-  status: string;
-  department: string;
-  description: string;
+  problemDepartment: string;
+  problemDescription: string;
+  problemId: string;
+  problemImageURL: string;
+  problemLocation: string;
+  problemPriority: string;
+  problemReportNum: number;
+  problemStatus: string;
+  problemSubClass: string;
+  problemTitle: string;
+  uid: string;
   focused: boolean;
   onFocusChange: (workOrderId: string) => void;
   onClick: () => void;
 }
 
 const Template = ({
-  workOrderId,
-  title,
-  submissionUser,
-  timestamp,
+  date,
+  pIndoorLocation,
   problemClass,
-  subclass,
-  location,
-  priority,
-  status,
-  department,
-  description,
+  problemDepartment,
+  problemDescription,
+  problemId,
+  problemImageURL,
+  problemLocation,
+  problemPriority,
+  problemReportNum,
+  problemStatus,
+  problemSubClass,
+  problemTitle,
+  uid,
   focused,
   onFocusChange,
   onClick,
 }: Props) => {
-  const [prio, setPrio] = useState(priority);
+  const [prio, setPrio] = useState(problemPriority);
   const [showStatusOptions, setShowStatusOptions] = useState(false);
-  const [selectedStatus, setSelectedStatus] = useState(status);
+  const [selectedStatus, setSelectedStatus] = useState(problemStatus);
+  const [submissionUserEmail, setSubmissionUserEmail] = useState<string | null>(
+    null
+  );
+
+  useEffect(() => {
+    fetchSubmissionUserEmail(uid);
+  }, [uid]);
+
+  const fetchSubmissionUserEmail = async (uid: string) => {
+    const docRef = doc(db, "users", uid);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      // setSubmissionUserEmail(docSnap.data().email);
+
+      const userData = docSnap.data();
+      if (userData && userData.email) {
+        const emailParts = userData.email.split("@");
+        if (emailParts.length > 0) {
+          setSubmissionUserEmail(emailParts[0]); // Get the part before the "@" symbol
+        }
+      }
+    } else {
+      console.log("No such document!");
+    }
+  };
 
   const handleEmailClick = () => {
-    onFocusChange(workOrderId); // Set this email to focus
+    onFocusChange(problemId
+      ); // Set this email to focus
     onClick();
   };
 
@@ -93,30 +128,30 @@ const Template = ({
 
         <div className="px-2 grid grid-flow-row-dense grid-rows-3 col-span-6">
           {/* title */}
-          <div className="row-span-1 font-semibold">{title}</div>
+          <div className="row-span-1 font-semibold">{problemTitle}</div>
 
           {/* requester and workorderid */}
           <div className="w-full grid grid-flow-col-dense grid-cols-4 row-span-1">
             <div className="col-span-3 text-md text-gray-500">
               <p className="">
-                Requested by <span className="">{submissionUser}</span>
+                Requested by <span className="">{submissionUserEmail}</span>
               </p>
             </div>
             <div className="col-span-1 ">
-              <p className="text-gray-500">{workOrderId}</p>
+              <p className="text-gray-500">{problemId}</p>
             </div>
           </div>
 
           <div className="w-full grid grid-flow-col-dense grid-cols-4 row-span-1">
             <div className="col-span-3 text-md flex flex-row items-start gap-2">
-              <p className="text-gray-500">{status}</p>
+              <p className="text-gray-500">{problemStatus}</p>
               <button onClick={() => setShowStatusOptions(!showStatusOptions)}>
                 <IoChevronDownOutline className="text-blue-500 mt-1" />
               </button>
             </div>
             <div className="w-fit h-fit col-span-1 flex flex-row items-center justify-center ">
               <LuDot className={dotColor} />
-              <p className="text-black font-bold">{priority}</p>
+              <p className="text-black font-bold">{problemPriority}</p>
             </div>
             {showStatusOptions && (
             <div className="absolute mt-6 ml-4 bg-white rounded-sm border border-gray-300">
