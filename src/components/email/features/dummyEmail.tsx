@@ -18,21 +18,13 @@ import { get } from "http";
 
 interface Props {
   onEmailClick: (email: FirestoreEmail) => void;
+  active: string;
+  selectedDepartments: string[]; // Added selectedDepartments prop
+  selectedProblemClasses: string[]; // Added selectedProblemClasses prop
+  selectedLocations: string[]; // Added selectedLocations prop
+  selectedPriorities: string; // Added selectedPriorities prop
+  // clickedEmails: Record<string, boolean>;
 }
-
-// interface Email {
-//   workOrderId: string;
-//   title: string;
-//   submissionUser: string;
-//   timestamp: string;
-//   problemClass: string;
-//   subclass: string;
-//   location: string;
-//   priority: string;
-//   status: string;
-//   department: string;
-//   description: string;
-// }
 
 interface FirestoreEmail {
   date: string;
@@ -51,37 +43,16 @@ interface FirestoreEmail {
   uid: string;
 }
 
-const dummyEmail = ({ onEmailClick }: Props) => {
+const dummyEmail = ({
+  onEmailClick,
+  active,
+  selectedDepartments,
+  selectedProblemClasses,
+  selectedLocations,
+  selectedPriorities,
+}: // clickedEmails,
+Props) => {
   const [focusedEmail, setFocusedEmail] = useState<string | null>(null);
-
-  // Use clientApp.firestore() to access Firestore
-  // const firestore = clientApp.firestore(); // Access Firestore using clientApp
-  // const [emails, loadEmails, emailsError] = useCollection(
-  //   collection(db, "problemsRecord"),
-  //   {}
-  // );
-  // const docRef = collection(db, "problemsRecord");
-  // const docSnap = await getDocs(docRef);
-  // // const q = query(collection(db, "problemsRecord"), orderBy("date"));
-
-  // if (docSnap.docs.length > 0) {
-  //   docSnap.docs.forEach((doc) => {
-  //     console.log("Document data:", doc.data());
-  //   });
-  // } else {
-  //   console.log("No such document!");
-  // }
-
-  // const unsub = onSnapshot(
-  //   collection(db, "problemsRecord"),
-  //   (doc) => {
-  //     console.log("Current data: ", doc.data());
-  //   },
-  //   (error) => {
-  //     console.log("Error fetching data: ", error);
-  //   }
-  // );
-  // unsub();
 
   const [emails, setEmails] = useState<FirestoreEmail[]>([]);
 
@@ -94,157 +65,140 @@ const dummyEmail = ({ onEmailClick }: Props) => {
       setEmails(emailsData);
     });
 
+    // const localStorageClickedEmails = localStorage.getItem("clickedEmails");
+    // if (localStorageClickedEmails) {
+    //   setClickedEmails(JSON.parse(localStorageClickedEmails));
+    // } else {
+    //   // If no clicked emails are stored in localStorage, set clickedEmails state to an empty object
+    //   setClickedEmails({});
+    // }
+
     // Clean up function to unsubscribe from the snapshot listener
     return () => emails();
   }, []);
-
-  // const dummyMail = [
-  //   {
-  //     workOrderId: "#WO-0001",
-  //     title: "1Ants Infestation at BB06",
-  //     submissionUser: "hfyce34",
-  //     timestamp: "9:15am, 15 February 2024",
-  //     problemClass: "Pest",
-  //     subclass: "Ants",
-  //     location: "BB06",
-  //     priority: "High",
-  //     status: "In Progress",
-  //     department: "Not Assigned",
-  //     description:
-  //       "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
-  //   },
-  //   {
-  //     workOrderId: "#WO-0002",
-  //     title: "2Ants Infestation at BB06",
-  //     submissionUser: "hfyce34",
-  //     timestamp: "9:15am, 15 February 2024",
-  //     problemClass: "Pest",
-  //     subclass: "Ants",
-  //     location: "BB06",
-  //     priority: "High",
-  //     status: "In Progress",
-  //     department: "Not Assigned",
-  //     description:
-  //       "Ants infestation at BB06. Please help to resolve the issue as soon as possible. Thank you.",
-  //   },
-  //   {
-  //     workOrderId: "#WO-0003",
-  //     title: "3Ants Infestation at BB06",
-  //     submissionUser: "hfyce34",
-  //     timestamp: "9:15am, 15 February 2024",
-  //     problemClass: "Pest",
-  //     subclass: "Ants",
-  //     location: "BB06",
-  //     priority: "High",
-  //     status: "In Progress",
-  //     department: "Not Assigned",
-  //     description:
-  //       "Ants infestation at BB06. Please help to resolve the issue as soon as possible. Thank you.",
-  //   },
-  //   {
-  //     workOrderId: "#WO-0004",
-  //     title: "4Ants Infestation at BB06",
-  //     submissionUser: "hfyce34",
-  //     timestamp: "9:15am, 15 February 2024",
-  //     problemClass: "Pest",
-  //     subclass: "Ants",
-  //     location: "BB06",
-  //     priority: "High",
-  //     status: "In Progress",
-  //     department: "Not Assigned",
-  //     description:
-  //       "Ants infestation at BB06. Please help to resolve the issue as soon as possible. Thank you.",
-  //   },
-  //   {
-  //     workOrderId: "#WO-0005",
-  //     title: "5Ants Infestation at BB06",
-  //     submissionUser: "hfyce34",
-  //     timestamp: "9:15am, 15 February 2024",
-  //     problemClass: "Pest",
-  //     subclass: "Ants",
-  //     location: "BB06",
-  //     priority: "High",
-  //     status: "In Progress",
-  //     department: "Not Assigned",
-  //     description:
-  //       "Ants infestation at BB06. Please help to resolve the issue as soon as possible. Thank you.",
-  //   },
-  //   {
-  //     workOrderId: "#WO-0006",
-  //     title: "6Ants Infestation at BB06",
-  //     submissionUser: "hfyce34",
-  //     timestamp: "9:15am, 15 February 2024",
-  //     problemClass: "Pest",
-  //     subclass: "Ants",
-  //     location: "BB06",
-  //     priority: "High",
-  //     status: "In Progress",
-  //     department: "Not Assigned",
-  //     description:
-  //       "Ants infestation at BB06. Please help to resolve the issue as soon as possible. Thank you.",
-  //   },
-  //   {
-  //     workOrderId: "#WO-0007",
-  //     title: "7Ants Infestation at BB06",
-  //     submissionUser: "hfyce34",
-  //     timestamp: "9:15am, 15 February 2024",
-  //     problemClass: "Pest",
-  //     subclass: "Ants",
-  //     location: "BB06",
-  //     priority: "High",
-  //     status: "In Progress",
-  //     department: "Not Assigned",
-  //     description:
-  //       "Ants infestation at BB06. Please help to resolve the issue as soon as possible. Thank you.",
-  //   },
-  //   {
-  //     workOrderId: "#WO-0008",
-  //     title: "8Ants Infestation at BB06",
-  //     submissionUser: "hfyce34",
-  //     timestamp: "9:15am, 15 February 2024",
-  //     problemClass: "Pest",
-  //     subclass: "Ants",
-  //     location: "BB06",
-  //     priority: "High",
-  //     status: "In Progress",
-  //     department: "Not Assigned",
-  //     description:
-  //       "Ants infestation at BB06. Please help to resolve the issue as soon as possible. Thank you.",
-  //   },
-  //   {
-  //     workOrderId: "#WO-0009",
-  //     title: "9Ants Infestation at BB06",
-  //     submissionUser: "hfyce34",
-  //     timestamp: "9:15am, 15 February 2024",
-  //     problemClass: "Pest",
-  //     subclass: "Ants",
-  //     location: "BB06",
-  //     priority: "High",
-  //     status: "In Progress",
-  //     department: "Not Assigned",
-  //     description:
-  //       "Ants infestation at BB06. Please help to resolve the issue as soon as possible. Thank you.",
-  //   },
-  // ];
 
   const handleFocusChange = (workOrderId: string) => {
     // Function to handle focus change
     setFocusedEmail(workOrderId);
   };
 
+  // const handleEmailClick = (email: FirestoreEmail) => {
+  //   if (!clickedEmails[email.problemId]) {
+  //     // Update clicked emails state and store it in localStorage
+  //     const updatedClickedEmails = { ...clickedEmails, [email.problemId]: true };
+  //     localStorage.setItem('clickedEmails', JSON.stringify(updatedClickedEmails));
+  //     onEmailClick(email);
+  //   }
+  // };
+  const [clickedEmails, setClickedEmails] = useState<Record<string, boolean>>(
+    {}
+  );
+
+  useEffect(() => {
+    const clickedEmails = localStorage.getItem("clickedEmails");
+    if (clickedEmails) {
+      setClickedEmails(JSON.parse(clickedEmails));
+    }
+  }, []);
+
+  const handleEmailClick = (email: FirestoreEmail) => {
+    console.log("Email clicked:", email.problemId);
+
+    if (!clickedEmails[email.problemId]) {
+      console.log("Updating clickedEmails state and localStorage");
+
+      // Update clicked emails state and store it in localStorage
+      const updatedClickedEmails = {
+        ...clickedEmails,
+        [email.problemId]: true,
+      };
+      localStorage.setItem(
+        "clickedEmails",
+        JSON.stringify(updatedClickedEmails)
+      );
+      onEmailClick(email);
+    } else {
+      console.log("Email already clicked:", email.problemId);
+
+      // Email has already been clicked, set it back to false in the state and localStorage
+      const updatedClickedEmails = {
+        ...clickedEmails,
+        [email.problemId]: false,
+      };
+      localStorage.setItem(
+        "clickedEmails",
+        JSON.stringify(updatedClickedEmails)
+      );
+      setClickedEmails(updatedClickedEmails);
+    }
+  };
+
   return (
     <div className="py-2 cursor-pointer">
-      {emails.map((email) => {
-        return (
-          <Template
-            key={email.problemId}
-            {...email}
-            focused={focusedEmail === email.problemId} // Pass whether this email is focused
-            onFocusChange={handleFocusChange} // Pass the function to handle focus change
-            onClick={() => onEmailClick(email)}
-          />
-        );
-      })}
+      {emails
+        .filter((email) => {
+          if (selectedDepartments.length === 0) {
+            // If no department is selected, display emails from all departments
+            return true;
+          } else {
+            // Display emails that match with selected departments
+            return selectedDepartments.includes(email.problemDepartment);
+          }
+        })
+        .filter((email) => {
+          if (selectedProblemClasses.length === 0) {
+            // If no problem class is selected, display emails from all problem classes
+            return true;
+          } else {
+            // Display emails that match with selected problem classes
+            return selectedProblemClasses.includes(email.problemClass);
+          }
+        })
+        .filter((email) => {
+          if (selectedLocations.length === 0) {
+            // If no location is selected, display emails from all locations
+            return true;
+          } else {
+            return selectedLocations.includes(email.problemLocation);
+          }
+        })
+        .filter((email) => {
+          if (selectedPriorities === "") {
+            // If no priority is selected, display emails from all priorities
+            return true;
+          } else {
+            return selectedPriorities === email.problemPriority;
+          }
+        })
+        .filter((email) =>
+          active === "To do"
+            ? email.problemStatus === "In Progress"
+            : email.problemStatus === "Done"
+        )
+        .map((email) => {
+          const isClicked = clickedEmails[email.problemId];
+          const previousEmailContent = localStorage.getItem(email.problemId);
+          const isNewContent =
+            previousEmailContent &&
+            previousEmailContent !== JSON.stringify(email);
+          return (
+            <div
+              key={email.problemId}
+              className={`email ${
+                isClicked ? "bg-yellow-100 bg-opacity-50" : ""
+              } ${isNewContent ? "bg-yellow-100 bg-opacity-50" : ""}`}
+              onClick={() => handleEmailClick(email)}
+            >
+              <Template
+                key={email.problemId}
+                {...email}
+                focused={focusedEmail === email.problemId}
+                onFocusChange={handleFocusChange}
+                onClick={() => onEmailClick(email)}
+              />
+            </div>
+          );
+        })}
     </div>
   );
 };
