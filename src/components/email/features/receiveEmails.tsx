@@ -5,21 +5,13 @@ import DummyEmail from "./dummyEmail";
 
 interface Props {
   onEmailClick: (email: FirestoreEmail) => void;
+  selectedDepartments: string[];
+  selectedProblemClasses: string[];
+  selectedLocations: string[];
+  selectedPriorities: string;
+  // clickedEmails: Record<string, boolean>;
 }
 
-// interface Email {
-//   workOrderId: string;
-//   title: string;
-//   submissionUser: string;
-//   timestamp: string;
-//   problemClass: string;
-//   subclass: string;
-//   location: string;
-//   priority: string;
-//   status: string;
-//   department:string;
-//   description: string;
-// }
 interface FirestoreEmail {
   date: string;
   pIndoorLocation: string;
@@ -37,7 +29,14 @@ interface FirestoreEmail {
   uid: string;
 }
 
-const ReceiveEmails = ({ onEmailClick }: Props) => {
+const ReceiveEmails = ({
+  onEmailClick,
+  selectedDepartments,
+  selectedProblemClasses,
+  selectedLocations,
+  selectedPriorities,
+  // clickedEmails,
+}: Props) => {
   const [active, setActive] = useState("To do");
 
   const handleClick = (section: React.SetStateAction<string>) => {
@@ -82,7 +81,15 @@ const ReceiveEmails = ({ onEmailClick }: Props) => {
         <p>Sort By: Priority: Highest First</p>
       </div>
       <div className="flex flex-col flex-grow overflow-y-auto">
-        <DummyEmail onEmailClick={onEmailClick} />
+        <DummyEmail
+          onEmailClick={onEmailClick}
+          active={active}
+          selectedDepartments={selectedDepartments}
+          selectedProblemClasses={selectedProblemClasses}
+          selectedLocations={selectedLocations}
+          selectedPriorities={selectedPriorities}
+          // clickedEmails={clickedEmails}
+        />
 
         {/* Email section: {active} */}
       </div>
