@@ -33,7 +33,6 @@ const MainDashboard: React.FC = () => {
   ];
 
   const problemPriorityData: StatusDataPoint[] = [
-    { name: 'None', value: 600 },
     { name: 'Low', value: 300 },
     { name: 'Medium', value: 300 },
     { name: 'High', value: 200 },
@@ -46,6 +45,17 @@ const MainDashboard: React.FC = () => {
     { name: 'PESTS', value: 200 },
     { name: 'PLUMBING', value: 100 },
     { name: 'ELECTRICAL', value: 150 },
+  ];
+
+  const teamProblemsData = [
+    { team: 'Air Conditioning Team', problems: Math.floor(Math.random() * 500) },
+    { team: 'Civil Engineering Team', problems: Math.floor(Math.random() * 500) },
+    { team: 'Cleaning Team', problems: Math.floor(Math.random() * 500) },
+    { team: 'Furniture Team', problems: Math.floor(Math.random() * 500) },
+    { team: 'Landscape Team', problems: Math.floor(Math.random() * 500) },
+    { team: 'Mechanical and Electrical Team', problems: Math.floor(Math.random() * 500) },
+    { team: 'Plumbing Team', problems: Math.floor(Math.random() * 500) },
+    { team: 'Security Team', problems: Math.floor(Math.random() * 500) },
   ];
 
   const COLORS: string[] = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
@@ -180,10 +190,8 @@ const MainDashboard: React.FC = () => {
             </div>
           </div>
 
-
-
        {/* Bar Chart for Problem Frequency */}
-       <div className="shadow-lg p-4 bg-white rounded-lg col-span-1 lg:col-span-2">
+        <div className="shadow-lg p-4 bg-white rounded-lg col-span-1 lg:col-span-2">
           <h3 className="text-md font-semibold mb-3">Frequency of Problem Priority</h3>
           <ResponsiveContainer width="100%" height={250}>
             <BarChart data={problemClasses}>
@@ -200,7 +208,7 @@ const MainDashboard: React.FC = () => {
               </div>
             ))}
           </div>
-        </div>
+        </div> 
 
         {/*Line Chart for Time to Complete */}
         <div className="shadow-lg p-4 bg-white rounded-lg col-span-1 lg:col-span-1">
@@ -220,6 +228,30 @@ const MainDashboard: React.FC = () => {
             <div>Average Time: {averageTime.toFixed(2)} hours</div>
           </div>
         </div>
+
+
+        {/* Bar Chart for Problem Frequency */}
+        <div className="shadow-lg p-4 bg-white rounded-lg col-span-full">
+          <h3 className="text-md font-semibold mb-3">Number of Problems by Team</h3>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={teamProblemsData}>
+              <XAxis dataKey="team" />
+              <YAxis />
+              <Tooltip />
+              <Bar dataKey="problems" fill="#8884d8" />
+            </BarChart>
+          </ResponsiveContainer>
+          <div className="flex justify-center mt-4">
+            {teamProblemsData.map((entry, index) => (
+              <div key={`value-${index}`} className="text-center mx-4">
+                <span className="font-semibold">{entry.team}:</span> {entry.problems}
+              </div>
+            ))}
+          </div>
+        </div> 
+
+
+
       </div>
     </div>
   );
