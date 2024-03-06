@@ -78,7 +78,16 @@ const ReceiveEmails = ({
         </div>
       </div>
       <div className="border-b-2 border-gray-400 border-opacity-30 py-2 px-2">
-        <p>Sort By: Priority: Highest First</p>
+        {/* put list of studd that is added in filter */}
+        <p>Filter By:
+          {selectedDepartments.length === 0 && selectedProblemClasses.length === 0 && selectedLocations.length === 0 && selectedPriorities.length === 0 
+            ? " None;"
+            : `${selectedDepartments.length > 0 ? " Department;" : ""}
+               ${selectedProblemClasses.length > 0 ? " Problem Class;" : ""}
+               ${selectedLocations.length > 0 ? " Location;" : ""}
+               ${selectedPriorities.length > 0 ? " Priority;" : ""}`
+          }
+        </p>
       </div>
       <div className="flex flex-col flex-grow overflow-y-auto">
         <DummyEmail
