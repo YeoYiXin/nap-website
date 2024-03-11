@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import UserProfile from "../../../../public/userProfile.png";
 import { LuDot } from "react-icons/lu";
-import { IoChevronDownOutline } from "react-icons/io5";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/firebase/clientApp";
 
@@ -77,17 +76,8 @@ const Template = ({
   };
 
   const handleEmailClick = () => {
-    onFocusChange(problemId
-      ); // Set this email to focus
+    onFocusChange(problemId); // Set this email to focus
     onClick();
-  };
-
-  const availableStatusOptions = ["Open", "In Progress", "Done"];
-
-  const handleStatusChange = (newStatus: string) => {
-    setSelectedStatus(newStatus);
-    setShowStatusOptions(false);
-    // You can perform any other actions related to status change here
   };
 
   let dotColor = "";
@@ -145,29 +135,13 @@ const Template = ({
           <div className="w-full grid grid-flow-col-dense grid-cols-4 row-span-1">
             <div className="col-span-3 text-md flex flex-row items-start gap-2">
               <p className="text-gray-500">{problemStatus}</p>
-              <button onClick={() => setShowStatusOptions(!showStatusOptions)}>
-                <IoChevronDownOutline className="text-blue-500 mt-1" />
-              </button>
             </div>
             <div className="w-fit h-fit col-span-1 flex flex-row items-center justify-center ">
               <LuDot className={dotColor} />
               <p className="text-black font-bold">{problemPriority}</p>
             </div>
-            {showStatusOptions && (
-            <div className="absolute mt-6 ml-4 bg-white rounded-sm border border-gray-300">
-              {availableStatusOptions.map((option) => (
-                <p
-                  key={option}
-                  className="cursor-pointer hover:bg-gray-100 p-2"
-                  onClick={() => handleStatusChange(option)}
-                >
-                  {option}
-                </p>
-              ))}
-            </div>
-          )}
+            
           </div>
-          
         </div>
       </div>
     </div>

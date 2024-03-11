@@ -219,11 +219,6 @@ const mainEmail = () => {
             {/* for work orders */}
             <h1 className="ml-2 mt-2 font-bold text-xl">Work Orders</h1>
           </div>
-          {/* <div className="row-span-1 flex flex-row-reverse gap-2  pr-5 pt-2">
-            <div>
-              <SearchBox />
-            </div>
-          </div> */}
         </div>
         <div className="flex flex-row gap-4  py-2 mb-1 px-2">
           {/* Made them into functional filter buttons - in button files*/}
