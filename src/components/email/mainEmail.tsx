@@ -210,14 +210,14 @@ const mainEmail = () => {
   };
 
   return (
-    <div className=" flex flex-col flex-grow h-screen">
-      <div className="flex flex-col h-[10%]">
+    <div className=" flex flex-col flex-grow h-screen pt-4">
+      <div className="flex flex-col h-[10%] pl-4">
         {/* the first two lines */}
         <div className="grid grid-flow-row-dense grid-cols-2">
           {/* Work orders row */}
           <div className="row-span-1 flex flex-row">
             {/* for work orders */}
-            <h1 className="ml-2 mt-2 font-bold text-xl">Work Orders</h1>
+            <h1 className="font-bold text-4xl mb-4">Work Orders</h1>
           </div>
         </div>
         <div className="flex flex-row gap-4  py-2 mb-1 px-2">

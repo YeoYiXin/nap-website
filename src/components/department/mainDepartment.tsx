@@ -54,7 +54,7 @@ const mainDepartment: React.FC = () => {
       <h1 className="font-bold text-4xl mb-4">Teams</h1>
       <div className="grid grid-cols-4 gap-4">
         {teams.map((team, index) => (
-          <div key={index} className="shadow-lg rounded-lg flex flex-col items-center p-4 m-2" style={{ height: '380px' }}>
+          <div key={index} className="shadow-lg rounded-lg flex flex-col items-center p-4 m-2" style={{ height: '42vh' }}>
             <Image src={team.imagePath} alt={team.depName} width={120} height={120} className='m-6' />
             <h2 className="font-bold text-xl mt-2 text-center">{team.depName}</h2>
             <p className="text-center mb-4">{team.depEmail}</p>

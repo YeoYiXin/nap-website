@@ -67,7 +67,7 @@ const MainDashboard: React.FC = () => {
   return (
 
     <div className="p-5">
-      <h2 className="text-lg font-semibold mb-5">Main Dashboard</h2>
+      <h1 className="font-bold text-4xl mb-4">Dashboard</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 
       
