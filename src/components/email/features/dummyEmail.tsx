@@ -2,14 +2,9 @@
 import React, { useEffect, useState } from "react";
 // import { clientApp, db } from "../../../firebase/clientApp";
 import { db } from "../../../firebase/clientApp";
-import { useCollection } from "react-firebase-hooks/firestore";
 import {
   collection,
-  getDocs,
-  query,
-  orderBy,
   onSnapshot,
-  doc,
 } from "firebase/firestore";
 
 import Template from "./receiveTemplate";
@@ -65,14 +60,6 @@ Props) => {
       setEmails(emailsData);
     });
 
-    // const localStorageClickedEmails = localStorage.getItem("clickedEmails");
-    // if (localStorageClickedEmails) {
-    //   setClickedEmails(JSON.parse(localStorageClickedEmails));
-    // } else {
-    //   // If no clicked emails are stored in localStorage, set clickedEmails state to an empty object
-    //   setClickedEmails({});
-    // }
-
     // Clean up function to unsubscribe from the snapshot listener
     return () => emails();
   }, []);
@@ -82,14 +69,6 @@ Props) => {
     setFocusedEmail(workOrderId);
   };
 
-  // const handleEmailClick = (email: FirestoreEmail) => {
-  //   if (!clickedEmails[email.problemId]) {
-  //     // Update clicked emails state and store it in localStorage
-  //     const updatedClickedEmails = { ...clickedEmails, [email.problemId]: true };
-  //     localStorage.setItem('clickedEmails', JSON.stringify(updatedClickedEmails));
-  //     onEmailClick(email);
-  //   }
-  // };
   const [clickedEmails, setClickedEmails] = useState<Record<string, boolean>>(
     {}
   );
@@ -199,6 +178,7 @@ Props) => {
             </div>
           );
         })}
+        
     </div>
   );
 };
