@@ -16,7 +16,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className} style={{ backgroundColor: "white" }}>{children}</body>
+      <head>
+        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCb6kHJY7_rFO5uA4y5hoooKSDiuYZrhM0&libraries=places"></script>
+      </head>
+      <body className={inter.className} style={{ backgroundColor: "white" }}>
+        {children}
+      </body>
     </html>
   );
 }

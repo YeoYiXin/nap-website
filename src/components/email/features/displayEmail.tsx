@@ -5,6 +5,7 @@ import EditButton from "../buttons/display_email/edit";
 import DeleteButton from "../buttons/display_email/deleteButton";
 import InProgressButton from "../buttons/display_email/inProgressButton";
 import DoneButton from "../buttons/display_email/done";
+import { Location } from "./location";
 import { LuDot } from "react-icons/lu";
 import { db } from "../../../firebase/clientApp";
 import "./scrollbar.css";
@@ -26,6 +27,8 @@ interface Props {
     problemSubClass: string;
     problemTitle: string;
     uid: string;
+    latitude: number;
+    longitude: number;
   } | null;
 }
 
@@ -38,6 +41,34 @@ const DisplayEmail = ({ selectedEmail }: Props) => {
     null
   );
 
+<<<<<<< Updated upstream
+=======
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+
+  const [showEditForm, setShowEditForm] = useState(false);
+
+  const [editedEmail, setEditedEmail] = useState(
+    selectedEmail ?? {
+      date: "",
+      pIndoorLocation: "",
+      problemClass: "",
+      problemDepartment: "",
+      problemDescription: "",
+      problemId: "",
+      problemImageURL: "",
+      problemLocation: "",
+      problemPriority: "",
+      problemReportNum: 0,
+      problemStatus: "",
+      problemSubClass: "",
+      problemTitle: "",
+      uid: "",
+      latitude: 0,
+      longitude: 0,
+    }
+  );
+
+>>>>>>> Stashed changes
   useEffect(() => {
     if (selectedEmail) {
       setStat(selectedEmail.problemStatus);
@@ -45,6 +76,44 @@ const DisplayEmail = ({ selectedEmail }: Props) => {
 
       // Fetch submission user's email
       fetchSubmissionUserEmail(selectedEmail.uid);
+<<<<<<< Updated upstream
+=======
+      // setEditedEmail(selectedEmail);
+      setSelected(selectedEmail);
+      setEditedEmail(selectedEmail);
+
+      // Subscribe to changes on the Firestore document
+      const emailDocRef = doc(db, "problemsRecord", selectedEmail.problemId);
+      const unsubscribe = onSnapshot(emailDocRef, (docSnapshot) => {
+        if (docSnapshot.exists()) {
+          console.log("hi reach here, ediiiiiiit");
+          const updatedEmailData = docSnapshot.data() as {
+            date: string;
+            pIndoorLocation: string;
+            problemClass: string;
+            problemDepartment: string;
+            problemDescription: string;
+            problemId: string;
+            problemImageURL: string;
+            problemLocation: string;
+            problemPriority: string;
+            problemReportNum: number;
+            problemStatus: string;
+            problemSubClass: string;
+            problemTitle: string;
+            uid: string;
+            latitude: number;
+            longitude: number;
+          };
+          setEditedEmail(updatedEmailData);
+        } else {
+          console.log("No such document!");
+        }
+      });
+
+      // Unsubscribe from the snapshot listener when component unmounts
+      return () => unsubscribe();
+>>>>>>> Stashed changes
     }
   }, [selectedEmail]);
 
@@ -270,11 +339,13 @@ const DisplayEmail = ({ selectedEmail }: Props) => {
                 <div>
                   <p className="font-bold">Location</p>
                 </div>
-                <div>
+                <div className="mb-2">
                   {selectedEmail.pIndoorLocation},{" "}
                   {selectedEmail.problemLocation}
                 </div>
-                <div>{"--"}Location Image</div>
+                <div className="mb-4">
+                  <Location latitude={selectedEmail.latitude} longitude={selectedEmail.longitude} />
+                </div>
               </div>
             </div>
           </div>

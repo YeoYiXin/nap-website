@@ -22,6 +22,8 @@ interface Props {
   problemSubClass: string;
   problemTitle: string;
   uid: string;
+  latitude: number;
+  longitude: number;
   focused: boolean;
   onFocusChange: (workOrderId: string) => void;
   onClick: () => void;
@@ -42,6 +44,8 @@ const Template = ({
   problemSubClass,
   problemTitle,
   uid,
+  latitude,
+  longitude,
   focused,
   onFocusChange,
   onClick,
