@@ -1,260 +1,336 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, LabelList, // Import LabelList
   PieChart, Pie, Cell, BarChart, Bar, ResponsiveContainer
 } from 'recharts';
+import { initializeApp } from 'firebase/app';
+import {
+  getFirestore,
+  collection,
+  getDocs,
+  query,
+  where,
+  DocumentData
+} from 'firebase/firestore';
 
-// Define the types for your data
-interface DataPoint {
+// Firebase config and initialization
+const firebaseConfig = {
+  apiKey: "AIzaSyBK8yLJkRtukow-9xr60aaMUh7BWz4VNNM",
+  authDomain: "nott-a-problem.firebaseapp.com",
+  projectId: "nott-a-problem",
+  storageBucket: "nott-a-problem.appspot.com",
+  messagingSenderId: "935607970977",
+  appId: "1:935607970977:web:70ed606a35eec5cc4a94e0",
+  measurementId: "G-KFMPTTR8YY"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// Define your data types
+interface DepartmentData {
   name: string;
-  Reported: number;
-  Completed: number;
+  open: number;
+  resolved: number;
 }
 
-interface StatusDataPoint {
+interface StatusData {
   name: string;
   value: number;
 }
 
+// Main dashboard component
 const MainDashboard: React.FC = () => {
-  // Sample data
-  const problemsData: DataPoint[] = [
-    { name: 'Week 1', Reported: 400, Completed: 240 },
-    { name: 'Week 2', Reported: 300, Completed: 139 },
-    { name: 'Week 3', Reported: 200, Completed: 980 },
-    { name: 'Week 4', Reported: 278, Completed: 390 },
-  ];
+  const [data, setData] = useState<DepartmentData[]>([]);
+  const [statusData, setStatusData] = useState<StatusData[]>([]);
+  const [priorityData, setPriorityData] = useState<StatusData[]>([]);
+  const [indoorOutdoorData, setIndoorOutdoorData] = useState<StatusData[]>([]);
+  const [totalUsers, setTotalUsers] = useState<number>(0);
+  
 
-  const problemStatusData: StatusDataPoint[] = [
-    { name: 'Open', value: 400 },
-    { name: 'On Hold', value: 300 },
-    { name: 'In Progress', value: 300 },
-    { name: 'Completed', value: 200 },
-  ];
+  useEffect(() => {
+    const fetchData = async () => {
+      // Fetch problems and group by department
+      const fetchProblemsByDepartment = async () => {
+        const problemsSnapshot = await getDocs(collection(db, 'problemsRecord'));
+        const departmentCounts: Record<string, { open: number; resolved: number }> = {};
 
-  const problemPriorityData: StatusDataPoint[] = [
-    { name: 'Low', value: 300 },
-    { name: 'Medium', value: 300 },
-    { name: 'High', value: 200 },
-  ];
+        problemsSnapshot.forEach((doc) => {
+          const data = doc.data();
+          const department = data.problemDepartment;
+          const status = data.problemStatus;
 
-  const problemClasses = [
-    { name: 'ROOM DAMAGE', value: 600 },
-    { name: 'FURNITURE', value: 300 },
-    { name: 'OUTDOOR', value: 300 },
-    { name: 'PESTS', value: 200 },
-    { name: 'PLUMBING', value: 100 },
-    { name: 'ELECTRICAL', value: 150 },
-  ];
+          if (!departmentCounts[department]) {
+            departmentCounts[department] = { open: 0, resolved: 0 };
+          }
 
-  const teamProblemsData = [
-    { team: 'Air Conditioning Team', problems: Math.floor(Math.random() * 500) },
-    { team: 'Civil Engineering Team', problems: Math.floor(Math.random() * 500) },
-    { team: 'Cleaning Team', problems: Math.floor(Math.random() * 500) },
-    { team: 'Furniture Team', problems: Math.floor(Math.random() * 500) },
-    { team: 'Landscape Team', problems: Math.floor(Math.random() * 500) },
-    { team: 'Mechanical and Electrical Team', problems: Math.floor(Math.random() * 500) },
-    { team: 'Plumbing Team', problems: Math.floor(Math.random() * 500) },
-    { team: 'Security Team', problems: Math.floor(Math.random() * 500) },
-  ];
+          if (status === 'Open') {
+            departmentCounts[department].open += 1;
+          } else if (status === 'Resolved') {
+            departmentCounts[department].resolved += 1;
+          }
+        });
 
-  const COLORS: string[] = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
+        const formattedData = Object.entries(departmentCounts).map(([name, counts]) => ({
+          name,
+          open: counts.open,
+          resolved: counts.resolved,
+        }));
 
-  // Calculate total hours and average time
-  const totalHours = problemsData.reduce((acc, cur) => acc + cur.Completed, 0);
-  const averageTime = totalHours / problemsData.length;
+        setData(formattedData);
+      };
 
-  return (
+      fetchProblemsByDepartment();
 
-    <div className="p-5">
-      <h2 className="text-lg font-semibold mb-5">Main Dashboard</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      // Fetch status distribution
+      const statusSnapshot = await getDocs(collection(db, 'problemsRecord'));
+      const statusDistribution: { [key: string]: number } = {};
+
+      statusSnapshot.forEach((doc) => {
+        const status = doc.data().problemStatus as string;
+        statusDistribution[status] = (statusDistribution[status] || 0) + 1;
+      });
+
+      setStatusData(Object.entries(statusDistribution).map(([name, value]) => ({ name, value })));
+
+      // Fetch the distribution of problem priority
+      const fetchPriorityDistribution = async () => {
+        const prioritySnapshot = await getDocs(collection(db, 'problemsRecord'));
+        const priorityCounts: { [key: string]: number } = {
+          Low: 0,
+          Medium: 0,
+          High: 0
+        };
+
+        prioritySnapshot.forEach((doc) => {
+          const priority = doc.data().problemPriority as string;
+          if (priority && priorityCounts.hasOwnProperty(priority)) {
+            priorityCounts[priority]++;
+          }
+        });
+
+        setPriorityData(Object.entries(priorityCounts).map(([name, value]) => ({ name, value })));
+      };
+
+      fetchPriorityDistribution();
 
       
-        {/* Line Chart for Problems Reported vs Completed */}
-        <div className="shadow-lg p-4 bg-white rounded-lg">
-          {/* Title */}
-          <h3 className="text-md font-semibold mb-3">Problems Reported vs Completed</h3>
-          {/* Responsive Container for Line Chart */}
-          <ResponsiveContainer width="100%" height={300}>
-            {/* Line Chart */}
-            <LineChart data={problemsData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-              {/* X Axis */}
-              <XAxis dataKey="name" />
-              {/* Y Axis */}
-              <YAxis />
-              {/* Grid */}
-              <CartesianGrid strokeDasharray="3 3" />
-              {/* Tooltip */}
+
+      // Fetch the breakdown of indoor vs. outdoor problems
+      const fetchIndoorOutdoorCounts = async () => {
+        const problemsSnapshot = await getDocs(collection(db, 'problemsRecord'));
+
+        let indoorCount = 0;
+        let outdoorCount = 0;
+
+        problemsSnapshot.forEach((doc) => {
+          const data = doc.data();
+          if (data.pIndoorLocation && data.pIndoorLocation.trim() !== "") {
+            indoorCount++;
+          }
+          if (data.pOutdoorLocation && data.pOutdoorLocation.trim() !== "") {
+            outdoorCount++;
+          }
+        });
+
+        setIndoorOutdoorData([
+          { name: 'Indoor', value: indoorCount },
+          { name: 'Outdoor', value: outdoorCount }
+        ]);
+      };
+
+      fetchIndoorOutdoorCounts();
+
+      // Fetch the total number of users
+      const fetchUserCount = async () => {
+        const userQuery = query(collection(db, 'users'));
+        const userSnapshot = await getDocs(userQuery);
+        setTotalUsers(userSnapshot.size); // Set the total number of users
+      };
+
+      fetchUserCount();
+    };
+
+    
+
+    fetchData();
+  }, []);
+  
+  
+
+  interface LabelProps {
+    cx: number;
+    cy: number;
+    midAngle: number;
+    innerRadius: number;
+    outerRadius: number;
+    percent: number;
+    index: number;
+  }
+  
+   // Chart colors and styles
+   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
+   const RADIAN = Math.PI / 180;
+ 
+   // Customized label for pie charts
+const renderCustomizedLabel = ({
+  cx, cy, midAngle, innerRadius, outerRadius, percent, index
+}: LabelProps) => {
+  const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+  const x = cx + radius * Math.cos(-midAngle * Math.PI / 180);
+  const y = cy + radius * Math.sin(-midAngle * Math.PI / 180);
+  return (
+    <text x={x} y={y} fill="white" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central">
+      {`${(percent * 100).toFixed(0)}%`}
+    </text>
+  );
+};
+const PIE_COLORS = ['#0088FE', '#00C49F', '#FFBB28'];
+return (
+  <div>
+    <h1 style={{ textAlign: 'left', marginTop: '20px', fontSize: '36px', fontWeight: 'bold' }}>Dashboard</h1>
+    <div style={{
+      display: 'grid',
+      gridTemplateColumns: 'repeat(2, 1fr)', 
+      gridTemplateRows: '1fr 1fr', 
+      gap: '20px',
+      margin: '0 auto',
+      maxWidth: '100%', 
+      padding: '20px',
+      height: '100vh', 
+    }}>
+
+
+
+        {/* Bar Chart for Indoor vs Outdoor Problems */}
+        <div style={{
+          boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+          padding: '20px',
+          borderRadius: '12px',
+          backgroundColor: '#fff',
+          gridColumn: '1', // Align to the first column
+          gridRow: '1', // Align to the first row
+        }}>
+          <h4 style={{ textAlign: 'center', marginBottom: '20px', color: '#333', fontWeight: 'bold' }}>Indoor vs Outdoor Problems</h4>
+          <ResponsiveContainer width="100%" height={300} >
+            <BarChart data={indoorOutdoorData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e3e3e3" />
+              <XAxis dataKey="name" tick={{ fill: '#6c757d' }} />
+              <YAxis tick={{ fill: '#6c757d' }} />
               <Tooltip />
-              {/* Legend */}
-              <Legend />
-              {/* Lines */}
-              <Line type="monotone" dataKey="Reported" stroke="#8884d8" />
-              <Line type="monotone" dataKey="Completed" stroke="#82ca9d" />
-            </LineChart>
+              <Bar dataKey="value" fill="#ffc107" name="Problems" radius={[10, 10, 0, 0]} />
+            </BarChart>
           </ResponsiveContainer>
-
-          {/* Numerical Values */}
-          <div className="flex justify-center mt-4">
-            {problemsData.map((entry, index) => (
-              <div key={`value-${index}`} className="text-center mx-4">
-                <span className="font-semibold">{entry.name}</span>:
-                <div>Reported: {entry.Reported}</div>
-                <div>Completed: {entry.Completed}</div>
-              </div>
-            ))}
-          </div>
         </div>
+      
+
+      {/* Pie Chart for Problem Priority */}
+    <div style={{ /* styles for the chart container */ }}>
+      <h4 style={{ textAlign: 'center', marginBottom: '20px', color: '#333' ,fontWeight: 'bold'}}>
+        Problem Priority Distribution
+      </h4>
+      <ResponsiveContainer width="100%" height={300}>
+        <PieChart>
+          <Pie
+            data={priorityData}
+            cx="50%"
+            cy="50%"
+            labelLine={false}
+            outerRadius={80}
+            fill="#8884d8"
+            dataKey="value"
+            nameKey="name"
+            label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+          >
+            {priorityData.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+            ))}
+          </Pie>
+          <Tooltip />
+          <Legend />
+        </PieChart>
+      </ResponsiveContainer>
+    </div>
+
+{/*
+ <div style={{
+        boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+        padding: '20px',
+        borderRadius: '12px',
+        backgroundColor: '#fff',
+        gridColumn: '1 / 2', // first column
+        gridRow: '2 / 3', // second row
+      }}>
+        <h4 style={{ textAlign: 'center', marginBottom: '20px', color: '#333', fontWeight: 'bold' }}>
+          Number of Problems by Department
+        </h4>
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#e3e3e3" />
+            <XAxis dataKey="name" tick={{ fill: '#6c757d' }} />
+            <YAxis />
+            <Tooltip />
+            <Legend verticalAlign="top" height={36} />
+            <Bar dataKey="open" fill="#007bff" name="Open Problems" />
+            <Bar dataKey="resolved" fill="#28a745" name="Resolved Problems" />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+*/}
 
 
-          {/* Pie Chart for Problem Status */}
-          <div className="shadow-lg p-4 bg-white rounded-lg">
-            {/* Title */}
-            <h3 className="text-md font-semibold mb-3">Problem Status</h3>
-            
-            {/* Responsive Container for Pie Chart */}
-            <ResponsiveContainer width="100%" height={300}>
-              {/* Pie Chart */}
-              <PieChart>
-                {/* Pie */}
-                <Pie
-                  data={problemStatusData}
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                  label={(entry) => entry.name}
-                >
-                  {/* Customizing Pie Colors */}
-                  {problemStatusData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                {/* Tooltip */}
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-
-            {/* Numerical Values */}
-            <div className="flex justify-center mt-4">
-              {problemStatusData.map((entry, index) => (
-                <div key={`value-${index}`} className="text-center mx-4">
-                  <span className="font-semibold">{entry.name}:</span> {entry.value}
-                </div>
+      {/* Pie Chart for Problem Status */}
+      <div style={{
+        boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+        padding: '20px',
+        borderRadius: '12px',
+        backgroundColor: '#fff',
+        gridColumn: '2 / 3', // second column
+        gridRow: '1 / 2', // first row
+      }}>
+        <h4 style={{ textAlign: 'center', marginBottom: '20px', color: '#333' , fontWeight: 'bold'}}>Problem Status Distribution</h4>
+        <ResponsiveContainer width="100%" height={300} >
+          <PieChart>
+            <Pie
+              dataKey="value"
+              isAnimationActive={true}
+              data={statusData}
+              cx="50%"
+              cy="50%"
+              outerRadius={100}
+              fill="#8884d8"
+              labelLine={false}
+              label={renderCustomizedLabel}
+            >
+              {statusData.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
               ))}
-            </div>
-          </div>
+            </Pie>
+            <Tooltip />
+          </PieChart>
+        </ResponsiveContainer>
+      </div>
 
-          {/* Donut Pie Chart for Problem Priority */}
-          <div className="shadow-lg p-4 bg-white rounded-lg">
-            {/* Title */}
-            <h3 className="text-md font-semibold mb-3">Problem Priority</h3>
-
-            {/* Responsive Container for Donut Pie Chart */}
-            <ResponsiveContainer width="100%" height={300}>
-              {/* Donut Pie Chart */}
-              <PieChart>
-                {/* Donut Pie */}
-                <Pie
-                  data={problemPriorityData.filter(entry => entry.name !== 'None')}
-                  dataKey="value"
-                  fill="#8884d8"
-                  label={(entry) => entry.name}
-                  innerRadius={60} // Adjust inner radius for the donut effect
-                >
-                  {/* Customizing Pie Colors */}
-                  {problemPriorityData
-                    .filter(entry => entry.name !== 'None')
-                    .map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                </Pie>
-                {/* Tooltip */}
-                <Tooltip />
-                {/* Legend */}
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
-
-            {/* Numerical Values */}
-            <div className="flex justify-center mt-4">
-              {problemPriorityData
-                .filter(entry => entry.name !== 'None')
-                .map((entry, index) => (
-                  <div key={`value-${index}`} className="text-center mx-4">
-                    <span className="font-semibold">{entry.name}:</span> {entry.value}
-                  </div>
-                ))}
-            </div>
-          </div>
-
-       {/* Bar Chart for Problem Frequency */}
-        <div className="shadow-lg p-4 bg-white rounded-lg col-span-1 lg:col-span-2">
-          <h3 className="text-md font-semibold mb-3">Frequency of Problem Priority</h3>
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={problemClasses}>
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="value" fill="#8884d8" />
-            </BarChart>
-          </ResponsiveContainer>
-          <div className="flex justify-center mt-4">
-            {problemClasses.map((entry, index) => (
-              <div key={`value-${index}`} className="text-center mx-4">
-                <span className="font-semibold">{entry.name}:</span> {entry.value}
-              </div>
-            ))}
-          </div>
-        </div> 
-
-        {/*Line Chart for Time to Complete */}
-        <div className="shadow-lg p-4 bg-white rounded-lg col-span-1 lg:col-span-1">
-          <h3 className="text-md font-semibold mb-3">Time to Complete</h3>
-          <ResponsiveContainer width="100%" height={250}>
-            <LineChart data={problemsData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-              <XAxis dataKey="name" />
-              <YAxis />
-              <CartesianGrid strokeDasharray="3 3" />
-              <Tooltip />
-              <Legend />
-              <Line type="monotone" dataKey="Completed" stroke="#8884d8" />
-            </LineChart>
-          </ResponsiveContainer>
-          <div className="text-center mt-4">
-            <div>Total Hours: {totalHours}</div>
-            <div>Average Time: {averageTime.toFixed(2)} hours</div>
-          </div>
-        </div>
-
-
-        {/* Bar Chart for Problem Frequency */}
-        <div className="shadow-lg p-4 bg-white rounded-lg col-span-full">
-          <h3 className="text-md font-semibold mb-3">Number of Problems by Team</h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={teamProblemsData}>
-              <XAxis dataKey="team" />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="problems" fill="#8884d8" />
-            </BarChart>
-          </ResponsiveContainer>
-          <div className="flex justify-center mt-4">
-            {teamProblemsData.map((entry, index) => (
-              <div key={`value-${index}`} className="text-center mx-4">
-                <span className="font-semibold">{entry.team}:</span> {entry.problems}
-              </div>
-            ))}
-          </div>
-        </div> 
-
-
-
+      {/* Total User Count at the bottom right */}
+      <div style={{
+        boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+        padding: '20px',
+        borderRadius: '12px',
+        backgroundColor: '#fff',
+        gridColumn: '2', 
+        gridRow: '2', 
+      }}>
+        <h4 style={{ textAlign: 'center', marginBottom: '20px', color: '#333', fontWeight: 'bold' }}>
+          Total Users
+        </h4>
+        <p style={{ textAlign: 'center', color: '#333', fontSize: '100px', margin: '0' }}>
+          {totalUsers}
+        </p>
       </div>
     </div>
-  );
+  </div>
+);
+
+
 }
 
 export default MainDashboard;
