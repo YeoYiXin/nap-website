@@ -24,6 +24,8 @@ interface FirestoreEmail {
   problemSubClass: string;
   problemTitle: string;
   uid: string;
+  latitude: number;
+  longitude: number;
 }
 
 const mainEmail = () => {
@@ -217,10 +219,12 @@ const mainEmail = () => {
           {/* Work orders row */}
           <div className="row-span-1 flex flex-row">
             {/* for work orders */}
-            <h1 className="font-bold text-4xl mb-4">Work Orders</h1>
+
+            <h1 className="font-bold text-3xl mb-1">Work Orders</h1>
+
           </div>
         </div>
-        <div className="flex flex-row gap-4  py-2 mb-1 px-2">
+        <div className="flex flex-row gap-4 py-2 mb-1">
           {/* Made them into functional filter buttons - in button files*/}
           <div className="">
             <AssignedToButton

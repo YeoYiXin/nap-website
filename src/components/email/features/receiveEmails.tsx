@@ -27,6 +27,8 @@ interface FirestoreEmail {
   problemSubClass: string;
   problemTitle: string;
   uid: string;
+  latitude: number;
+  longitude: number;
 }
 
 const ReceiveEmails = ({

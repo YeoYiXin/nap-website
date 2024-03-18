@@ -5,6 +5,7 @@ import EditButton from "../buttons/display_email/edit";
 import DeleteButton from "../buttons/display_email/deleteButton";
 import InProgressButton from "../buttons/display_email/inProgressButton";
 import DoneButton from "../buttons/display_email/done";
+import { Location } from "./location";
 import { LuDot } from "react-icons/lu";
 import { db } from "../../../firebase/clientApp";
 import "./scrollbar.css";
@@ -32,6 +33,8 @@ interface Props {
     problemSubClass: string;
     problemTitle: string;
     uid: string;
+    latitude: number;
+    longitude: number;
   } | null;
 }
 
@@ -44,7 +47,6 @@ const DisplayEmail = ({ selectedEmail }: Props) => {
   const [submissionUserEmail, setSubmissionUserEmail] = useState<string | null>(
     null
   );
-
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
 
   const [showEditForm, setShowEditForm] = useState(false);
@@ -65,6 +67,8 @@ const DisplayEmail = ({ selectedEmail }: Props) => {
       problemSubClass: "",
       problemTitle: "",
       uid: "",
+      latitude: 0,
+      longitude: 0,
     }
   );
 
@@ -99,6 +103,8 @@ const DisplayEmail = ({ selectedEmail }: Props) => {
             problemSubClass: string;
             problemTitle: string;
             uid: string;
+            latitude: number;
+            longitude: number;
           };
           setEditedEmail(updatedEmailData);
         } else {
@@ -385,11 +391,13 @@ const DisplayEmail = ({ selectedEmail }: Props) => {
                 <div>
                   <p className="font-bold">Location</p>
                 </div>
-                <div>
+                <div className="mb-2">
                   {selectedEmail.pIndoorLocation},{" "}
                   {selectedEmail.problemLocation}
                 </div>
-                <div>{"--"}Location Image</div>
+                <div className="mb-4">
+                  <Location latitude={selectedEmail.latitude} longitude={selectedEmail.longitude} />
+                </div>
               </div>
             </div>
           </div>
