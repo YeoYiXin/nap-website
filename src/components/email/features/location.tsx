@@ -15,7 +15,7 @@ export const Location = ({ latitude, longitude }: Props) => {
     if (mapRef.current) {
       map = new google.maps.Map(mapRef.current, {
         center: { lat: latitude, lng: longitude },
-        zoom: 15,
+        zoom: 20,
       });
 
       // Add marker
