@@ -97,4 +97,3 @@ const mainDepartment: React.FC = () => {
 };
 
 export default mainDepartment;
-
