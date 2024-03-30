@@ -49,9 +49,15 @@ const center = {
   lng: 101.79,
 };
 
+// Define your data types
+interface DepartmentData {
+  name: string;
+  problemCount: number;
+}
+
 // Main dashboard component
 const MainDashboard: React.FC = () => {
-  const [data, setData] = useState<DepartmentData[]>([]);
+  const [departmentData, setDepartmentData] = useState<DepartmentData[]>([]);
   const [heatmapData, setHeatmapData] = useState<google.maps.LatLng[]>([]);
   const [statusData, setStatusData] = useState<StatusData[]>([]);
   const [priorityData, setPriorityData] = useState<StatusData[]>([]);
@@ -67,35 +73,29 @@ const MainDashboard: React.FC = () => {
     const fetchData = async () => {
       // Fetch problems and group by department
       const fetchProblemsByDepartment = async () => {
+        const departmentCounts: Record<string, number> = {};
         const problemsSnapshot = await getDocs(collection(db, 'problemsRecord'));
-        const departmentCounts: Record<string, { open: number; resolved: number }> = {};
-
+        
         problemsSnapshot.forEach((doc) => {
           const data = doc.data();
           const department = data.problemDepartment;
-          const status = data.problemStatus;
-
-          if (!departmentCounts[department]) {
-            departmentCounts[department] = { open: 0, resolved: 0 };
-          }
-
-          if (status === 'Open') {
-            departmentCounts[department].open += 1;
-          } else if (status === 'Resolved') {
-            departmentCounts[department].resolved += 1;
-          }
+      
+          // Increment the count for the department
+          departmentCounts[department] = (departmentCounts[department] || 0) + 1;
         });
-
-        const formattedData = Object.entries(departmentCounts).map(([name, counts]) => ({
+      
+        // Format the data for the bar chart
+        const formattedData: DepartmentData[] = Object.entries(departmentCounts).map(([name, problemCount]) => ({
           name,
-          open: counts.open,
-          resolved: counts.resolved,
+          problemCount,
+          open: 0, // Set default value for open count
+          resolved: 0 // Set default value for resolved count
         }));
-
-        setData(formattedData);
+      
+        setDepartmentData(formattedData);
       };
-
-      await fetchProblemsByDepartment();
+  
+      fetchProblemsByDepartment();
 
       // Fetch status distribution
       const statusSnapshot = await getDocs(collection(db, 'problemsRecord'));
@@ -207,27 +207,44 @@ const renderCustomizedLabel = ({
   const x = cx + radius * Math.cos(-midAngle * Math.PI / 180);
   const y = cy + radius * Math.sin(-midAngle * Math.PI / 180);
   return (
+    <text x={x} y={y} fill="white" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central">
+      {`${(percent * 100).toFixed(0)}%`}
+    </text>
+  );
+};
+const PIE_COLORS = ['#0088FE', '#00C49F', '#FFBB28'];
 
-    <div className="p-5">
-      <h1 className="font-bold text-4xl mb-4">Dashboard</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 
-      
-        {/* Line Chart for Problems Reported vs Completed */}
-        <div className="shadow-lg p-4 bg-white rounded-lg">
-          {/* Title */}
-          <h3 className="text-md font-semibold mb-3">Problems Reported vs Completed</h3>
-          {/* Responsive Container for Line Chart */}
-          <ResponsiveContainer width="100%" height={300}>
-            {/* Line Chart */}
-            <LineChart data={problemsData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-              {/* X Axis */}
-              <XAxis dataKey="name" />
-              {/* Y Axis */}
-              <YAxis />
-              {/* Grid */}
-              <CartesianGrid strokeDasharray="3 3" />
-              {/* Tooltip */}
+
+
+return (
+  <div>
+    <h1 style={{ textAlign: 'left', marginTop: '20px', fontSize: '36px', fontWeight: 'bold' }}>Dashboard</h1>
+    <div style={{
+      display: 'grid',
+      gridTemplateColumns: 'repeat(2, 1fr)', 
+      gridTemplateRows: '1fr 1fr', 
+      gap: '20px',
+      margin: '0 auto',
+      maxWidth: '100%', 
+      padding: '20px',
+      height: '100vh', 
+    }}>
+        {/* Bar Chart for Indoor vs Outdoor Problems */}
+        <div style={{
+          boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+          padding: '20px',
+          borderRadius: '12px',
+          backgroundColor: '#fff',
+          gridColumn: '1', // Align to the first column
+          gridRow: '1', // Align to the first row
+        }}>
+          <h4 style={{ textAlign: 'center', marginBottom: '20px', color: '#333', fontWeight: 'bold' }}>Indoor vs Outdoor Problems</h4>
+          <ResponsiveContainer width="100%" height={300} >
+            <BarChart data={indoorOutdoorData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e3e3e3" />
+              <XAxis dataKey="name" tick={{ fill: '#6c757d' }} />
+              <YAxis tick={{ fill: '#6c757d' }} />
               <Tooltip />
               <Bar dataKey="value" fill="#ffc107" name="Problems" radius={[10, 10, 0, 0]} />
             </BarChart>
@@ -263,30 +280,29 @@ const renderCustomizedLabel = ({
       </ResponsiveContainer>
     </div>
 
-     {/* Bar Chart for Number of Problems by Department 
-    <div style={{
-          boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
-          padding: '20px',
-          borderRadius: '12px',
-          backgroundColor: '#fff',
-          gridColumn: '2', // first column
-          gridRow: '3', // second row
-        }}>
-          <h4 style={{ textAlign: 'center', marginBottom: '20px', color: '#333', fontWeight: 'bold' }}>
-            Number of Problems by Department
-          </h4>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={data} margin={{ top: 10, right: 20, left: 10, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e3e3e3" />
-              <XAxis dataKey="name" tick={{ fill: '#6c757d' }} />
-              <YAxis />
-              <Tooltip />
-              <Legend verticalAlign="top" height={36} />
-              <Bar dataKey="open" fill="#007bff" name="Open Problems" />
-              <Bar dataKey="resolved" fill="#28a745" name="Resolved Problems" />
-            </BarChart>
-          </ResponsiveContainer>
-      </div>*/}
+     {/* Bar Chart for Number of Problems by Department*/}
+     <div style={{
+      boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+      padding: '20px',
+      borderRadius: '12px',
+      backgroundColor: '#fff',
+      gridColumn: '1 / span 2', // first column
+      gridRow: '3', // start at second row and span 2 rows
+    }}>
+      <h4 style={{ textAlign: 'center', marginBottom: '20px', color: '#333', fontWeight: 'bold' }}>
+        Number of Problems by Department
+      </h4>
+      <ResponsiveContainer width="100%" height={300}>
+        <BarChart data={departmentData} margin={{ top: 10, right: 20, left: 10, bottom: 5 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#e3e3e3" />
+          <XAxis dataKey="name" tick={{ fill: '#6c757d' }} />
+          <YAxis />
+          <Tooltip />
+          <Legend verticalAlign="top" height={36} />
+          <Bar dataKey="problemCount" fill="#007bff" name="Total Problems" />
+        </BarChart>
+      </ResponsiveContainer>
+  </div>
 
       {/* Pie Chart for Problem Status */}
       <div style={{
