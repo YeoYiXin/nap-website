@@ -207,27 +207,43 @@ const renderCustomizedLabel = ({
   const x = cx + radius * Math.cos(-midAngle * Math.PI / 180);
   const y = cy + radius * Math.sin(-midAngle * Math.PI / 180);
   return (
+    <text x={x} y={y} fill="white" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central">
+      {`${(percent * 100).toFixed(0)}%`}
+    </text>
+  );
+};
+const PIE_COLORS = ['#0088FE', '#00C49F', '#FFBB28'];
+return (
+  <div>
+    <h1 style={{ textAlign: 'left', marginTop: '20px', fontSize: '36px', fontWeight: 'bold' }}>Dashboard</h1>
+    <div style={{
+      display: 'grid',
+      gridTemplateColumns: 'repeat(2, 1fr)', 
+      gridTemplateRows: '1fr 1fr', 
+      gap: '20px',
+      margin: '0 auto',
+      maxWidth: '100%', 
+      padding: '20px',
+      height: '100vh', 
+    }}>
 
-    <div className="p-5">
-      <h1 className="font-bold text-4xl mb-4">Dashboard</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 
-      
-        {/* Line Chart for Problems Reported vs Completed */}
-        <div className="shadow-lg p-4 bg-white rounded-lg">
-          {/* Title */}
-          <h3 className="text-md font-semibold mb-3">Problems Reported vs Completed</h3>
-          {/* Responsive Container for Line Chart */}
-          <ResponsiveContainer width="100%" height={300}>
-            {/* Line Chart */}
-            <LineChart data={problemsData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-              {/* X Axis */}
-              <XAxis dataKey="name" />
-              {/* Y Axis */}
-              <YAxis />
-              {/* Grid */}
-              <CartesianGrid strokeDasharray="3 3" />
-              {/* Tooltip */}
+
+        {/* Bar Chart for Indoor vs Outdoor Problems */}
+        <div style={{
+          boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+          padding: '20px',
+          borderRadius: '12px',
+          backgroundColor: '#fff',
+          gridColumn: '1', // Align to the first column
+          gridRow: '1', // Align to the first row
+        }}>
+          <h4 style={{ textAlign: 'center', marginBottom: '20px', color: '#333', fontWeight: 'bold' }}>Indoor vs Outdoor Problems</h4>
+          <ResponsiveContainer width="100%" height={300} >
+            <BarChart data={indoorOutdoorData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e3e3e3" />
+              <XAxis dataKey="name" tick={{ fill: '#6c757d' }} />
+              <YAxis tick={{ fill: '#6c757d' }} />
               <Tooltip />
               <Bar dataKey="value" fill="#ffc107" name="Problems" radius={[10, 10, 0, 0]} />
             </BarChart>
