@@ -13,6 +13,7 @@
     "@nextui-org/react": "^2.2.9",
     "@react-google-maps/api": "^2.19.3",
     "@swc/core": "^1.4.2",
+    "@syncfusion/ej2-react-heatmap": "^25.1.35",
     "chart.js": "^4.4.2",
     "firebase": "^10.8.1",
     "firebaseui": "^6.1.0",

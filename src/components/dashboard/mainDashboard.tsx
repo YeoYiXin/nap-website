@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { GoogleMap, useLoadScript, HeatmapLayer } from '@react-google-maps/api';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, LabelList, // Import LabelList
   PieChart, Pie, Cell, BarChart, Bar, ResponsiveContainer
@@ -38,14 +39,29 @@ interface StatusData {
   value: number;
 }
 
+const mapContainerStyle = {
+  width: '100vw',
+  height: '100vh'
+};
+
+const center = {
+  lat: 2.94,
+  lng: 101.79,
+};
+
 // Main dashboard component
 const MainDashboard: React.FC = () => {
   const [data, setData] = useState<DepartmentData[]>([]);
+  const [heatmapData, setHeatmapData] = useState<google.maps.LatLng[]>([]);
   const [statusData, setStatusData] = useState<StatusData[]>([]);
   const [priorityData, setPriorityData] = useState<StatusData[]>([]);
   const [indoorOutdoorData, setIndoorOutdoorData] = useState<StatusData[]>([]);
   const [totalUsers, setTotalUsers] = useState<number>(0);
-  
+
+  const { isLoaded, loadError } = useLoadScript({
+    googleMapsApiKey: "YOUR_GOOGLE_MAPS_API_KEY",
+    libraries: ["visualization"],
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -79,7 +95,7 @@ const MainDashboard: React.FC = () => {
         setData(formattedData);
       };
 
-      fetchProblemsByDepartment();
+      await fetchProblemsByDepartment();
 
       // Fetch status distribution
       const statusSnapshot = await getDocs(collection(db, 'problemsRecord'));
@@ -111,9 +127,7 @@ const MainDashboard: React.FC = () => {
         setPriorityData(Object.entries(priorityCounts).map(([name, value]) => ({ name, value })));
       };
 
-      fetchPriorityDistribution();
-
-      
+      await fetchPriorityDistribution();
 
       // Fetch the breakdown of indoor vs. outdoor problems
       const fetchIndoorOutdoorCounts = async () => {
@@ -138,7 +152,7 @@ const MainDashboard: React.FC = () => {
         ]);
       };
 
-      fetchIndoorOutdoorCounts();
+      await fetchIndoorOutdoorCounts();
 
       // Fetch the total number of users
       const fetchUserCount = async () => {
@@ -147,13 +161,27 @@ const MainDashboard: React.FC = () => {
         setTotalUsers(userSnapshot.size); // Set the total number of users
       };
 
-      fetchUserCount();
+      await fetchUserCount();
     };
 
-    
+    if (isLoaded) {
+      fetchData();
+    }
+  }, [isLoaded]);
 
-    fetchData();
-  }, []);
+  if (loadError) return <div>Error loading maps</div>;
+  if (!isLoaded) return <div>Loading...</div>;
+
+  const fetchLocationData = async () => {
+    const querySnapshot = await getDocs(collection(db, 'problemsRecord'));
+    const locations = querySnapshot.docs.map(doc => {
+      const data = doc.data();
+      return new window.google.maps.LatLng(data.latitude, data.longitude);
+    });
+    setHeatmapData(locations);
+  };
+
+  fetchLocationData();
   
   
 
@@ -251,32 +279,30 @@ return (
       </ResponsiveContainer>
     </div>
 
-{/*
- <div style={{
-        boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
-        padding: '20px',
-        borderRadius: '12px',
-        backgroundColor: '#fff',
-        gridColumn: '1 / 2', // first column
-        gridRow: '2 / 3', // second row
-      }}>
-        <h4 style={{ textAlign: 'center', marginBottom: '20px', color: '#333', fontWeight: 'bold' }}>
-          Number of Problems by Department
-        </h4>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e3e3e3" />
-            <XAxis dataKey="name" tick={{ fill: '#6c757d' }} />
-            <YAxis />
-            <Tooltip />
-            <Legend verticalAlign="top" height={36} />
-            <Bar dataKey="open" fill="#007bff" name="Open Problems" />
-            <Bar dataKey="resolved" fill="#28a745" name="Resolved Problems" />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-*/}
-
+     {/* Bar Chart for Number of Problems by Department 
+    <div style={{
+          boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+          padding: '20px',
+          borderRadius: '12px',
+          backgroundColor: '#fff',
+          gridColumn: '2', // first column
+          gridRow: '3', // second row
+        }}>
+          <h4 style={{ textAlign: 'center', marginBottom: '20px', color: '#333', fontWeight: 'bold' }}>
+            Number of Problems by Department
+          </h4>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={data} margin={{ top: 10, right: 20, left: 10, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e3e3e3" />
+              <XAxis dataKey="name" tick={{ fill: '#6c757d' }} />
+              <YAxis />
+              <Tooltip />
+              <Legend verticalAlign="top" height={36} />
+              <Bar dataKey="open" fill="#007bff" name="Open Problems" />
+              <Bar dataKey="resolved" fill="#28a745" name="Resolved Problems" />
+            </BarChart>
+          </ResponsiveContainer>
+      </div>*/}
 
       {/* Pie Chart for Problem Status */}
       <div style={{
@@ -309,6 +335,8 @@ return (
           </PieChart>
         </ResponsiveContainer>
       </div>
+
+ 
 
       {/* Total User Count at the bottom right */}
       <div style={{
