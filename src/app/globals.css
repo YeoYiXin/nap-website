@@ -7,16 +7,3 @@
       @apply bg-white;
   }
 }
-/* :root {
-  --foreground-rgb: bg(255, 255, 255);
-}
-
-body {
-  background-color: var(--foreground-rgb);
-}
-
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
-} */

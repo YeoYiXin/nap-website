@@ -16,7 +16,7 @@ export default function Home() {
 
   return (
     <>
-      <div className="bg-white flex min-h-screen">
+      <div className="bg-white flex min-h-screen" style={{ paddingLeft: '10rem' }}>
         <NavBar onSectionClick={handlePageClick} />
 
         {/* Main content - statistics first*/}
