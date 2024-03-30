@@ -55,6 +55,11 @@ interface DepartmentData {
   problemCount: number;
 }
 
+interface ClassData {
+  name: string;
+  count: number;
+}
+
 // Main dashboard component
 const MainDashboard: React.FC = () => {
   const [departmentData, setDepartmentData] = useState<DepartmentData[]>([]);
@@ -63,6 +68,7 @@ const MainDashboard: React.FC = () => {
   const [priorityData, setPriorityData] = useState<StatusData[]>([]);
   const [indoorOutdoorData, setIndoorOutdoorData] = useState<StatusData[]>([]);
   const [totalUsers, setTotalUsers] = useState<number>(0);
+  const [classData, setClassData] = useState<ClassData[]>([]);
 
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: "YOUR_GOOGLE_MAPS_API_KEY",
@@ -88,14 +94,36 @@ const MainDashboard: React.FC = () => {
         const formattedData: DepartmentData[] = Object.entries(departmentCounts).map(([name, problemCount]) => ({
           name,
           problemCount,
-          open: 0, // Set default value for open count
-          resolved: 0 // Set default value for resolved count
+          open: 0, 
+          resolved: 0 
         }));
       
         setDepartmentData(formattedData);
       };
   
       fetchProblemsByDepartment();
+
+      // Fetch problems and group by class
+      const fetchProblemsByClass = async () => {
+        const classCounts: Record<string, number> = {};
+        const problemsSnapshot = await getDocs(collection(db, 'problemsRecord'));
+        
+        problemsSnapshot.forEach((doc) => {
+          const data = doc.data();
+          const problemClass = data.problemClass;
+  
+          classCounts[problemClass] = (classCounts[problemClass] || 0) + 1;
+        });
+  
+        const formattedClassData: ClassData[] = Object.entries(classCounts).map(([name, count]) => ({
+          name,
+          count
+        }));
+  
+        setClassData(formattedClassData);
+      };
+  
+      fetchProblemsByClass();
 
       // Fetch status distribution
       const statusSnapshot = await getDocs(collection(db, 'problemsRecord'));
@@ -128,6 +156,8 @@ const MainDashboard: React.FC = () => {
       };
 
       await fetchPriorityDistribution();
+
+
 
       // Fetch the breakdown of indoor vs. outdoor problems
       const fetchIndoorOutdoorCounts = async () => {
@@ -336,7 +366,29 @@ return (
         </ResponsiveContainer>
       </div>
 
- 
+   {/* Bar Chart for Number of Problems by Class */}
+       <div style={{
+        boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+        padding: '20px',
+        borderRadius: '12px',
+        backgroundColor: '#fff',
+        gridColumn: '1 / span 2', // spans two columns
+        gridRow: '4', // fourth row
+      }}>
+        <h4 style={{ textAlign: 'center', marginBottom: '20px', color: '#333', fontWeight: 'bold' }}>
+          Number of Problems by Class
+        </h4>
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={classData} margin={{ top: 10, right: 20, left: 10, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#e3e3e3" />
+            <XAxis dataKey="name" tick={{ fill: '#6c757d' }} />
+            <YAxis />
+            <Tooltip />
+            <Legend verticalAlign="top" height={36} />
+            <Bar dataKey="count" fill="#82ca9d" name="Number of Reports" />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
 
       {/* Total User Count at the bottom right */}
       <div style={{
