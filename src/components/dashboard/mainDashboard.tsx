@@ -38,6 +38,13 @@ interface PieLabel {
   percent: number;
 }
 
+interface HeatmapDisplayData {
+  areaName: string;
+  problemCount: number;
+  latitude: number;
+  longitude: number;
+}
+
 
 interface HeatmapPoint {
   latitude: number;
@@ -68,39 +75,109 @@ const MainDashboard: React.FC = () => {
   const [transformedHeatmapData, setTransformedHeatmapData] = useState<any[]>([]);
   const [hoveredCell, setHoveredCell] = useState<{ x: number; y: number; } | null>(null);
 
-// Define cellStyle function here
-const cellStyle = (value: number | null) => {
-  // Assume a maximum value for scaling the dot size
-  const maxValue = 10; // You should adjust this to your actual max value
-  const size = value ? Math.sqrt(value / maxValue) * 20 : 10; // Scale the size of the dot
+// This function transforms the fetched heatmap data for display.
+const transformToHeatmapDisplayData = (fetchedHeatmapData: HeatmapPoint[]): HeatmapDisplayData[] => {
+  const heatmapDisplayData: Record<string, HeatmapDisplayData> = {};
+
+  // Iterate over the fetched heatmap data to group by areaName
+  fetchedHeatmapData.forEach(point => {
+    // If areaName is defined and it's a new area, initialize it in the heatmapDisplayData
+    if (point.areaName && !heatmapDisplayData[point.areaName]) {
+      heatmapDisplayData[point.areaName] = {
+        areaName: point.areaName,
+        problemCount: 0, // Initialize problemCount for this area
+        latitude: point.latitude, // Assume the first point's latitude and longitude represent the area
+        longitude: point.longitude
+      };
+    }
+
+    // Aggregate the problemCount for each area
+    if (point.areaName) {
+      heatmapDisplayData[point.areaName].problemCount += point.problemCount;
+    }
+  });
+
+  // Convert the heatmapDisplayData object into an array of values
+  return Object.values(heatmapDisplayData);
+};
+
+const calculateSizeBasedOnValue = (value: number, maxValue: number): number => {
+  const maxSize = 100; // Define the maximum size of your circles
+  return (value / maxValue) * maxSize; // This gives you a size relative to the maximum value
+};
+
+const transformCoordinatesToPosition = (
+  latitude: number,
+  longitude: number,
+  containerWidth: number,
+  containerHeight: number
+) => {
+  // Placeholder: These should be your actual min and max latitude and longitude
+  const minLat = -90;
+  const maxLat = 90;
+  const minLng = -180;
+  const maxLng = 180;
+
+  // Convert latitude and longitude to a percentage of the container dimensions
+  const xPercent = ((longitude - minLng) / (maxLng - minLng)) * containerWidth;
+  const yPercent = ((latitude - minLat) / (maxLat - minLat)) * containerHeight;
+
+  return {
+    left: `${xPercent}px`,
+    top: `${yPercent}px`,
+  };
+};
+
+
+const cellStyle = (problemCount: number, maxProblemCount: number): React.CSSProperties => {
+  const maxSize = 50; // Maximum size of the circle
+  const size = (problemCount / maxProblemCount) * maxSize; // Calculate size relative to the max count
 
   return {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    background: '#ff4500', // Color for the dot
+    background: '#ff4500', // Color of the circle
     borderRadius: '50%', // Make it round
-    width: `${size}px`, // Width based on the value
-    height: `${size}px`, // Height based on the value
-    margin: 'auto' // Center the dot within the cell
+    width: `${size}px`, // Set width based on the problemCount
+    height: `${size}px`, // Set height based on the problemCount
+    position: 'absolute', // Absolute positioning within the heatmap
+    transform: 'translate(-50%, -50%)', // Center the circle
+    margin: 'auto'
   };
 };
 
-const cellRender = (x: number, y: number, value: number | null): JSX.Element | null => {
-  if (value !== null && value > 0) { // Check for a non-null and positive value
-    const style = cellStyle(value); // Get the dynamic style based on the value
+const containerWidth = window.innerWidth; // Get the width of the window
+const containerHeight = window.innerHeight; // Get the height of the window
+
+// Render function for your component
+const renderHeatmap = (data: HeatmapDisplayData[]) => {
+  // Find the maximum problem count for scaling
+  const maxProblemCount = Math.max(...data.map(d => d.problemCount));
+
+  // Now render your heatmap points
+  return data.map(point => {
+    const size = calculateSizeBasedOnValue(point.problemCount, maxProblemCount);
+    const position = transformCoordinatesToPosition(point.latitude, point.longitude, containerWidth, containerHeight);
+
     return (
-      <div className="heatmap-cell-wrapper">
-        {/* Apply the dynamic style */}
-        <div className="heatmap-cell-dot" style={style} />
+      <div key={point.areaName} className="location-point" style={{
+        position: 'absolute',
+        ...position,
+        width: `${size}px`,
+        height: `${size}px`,
+        borderRadius: '50%', // To make the divs circular
+        backgroundColor: '#ff4500', // Color of your circles
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        // ... any additional styling you need
+      }}>
+        <span>{point.areaName} ({point.problemCount})</span>
       </div>
     );
-  }
-
-  return null; // Render nothing if there is no value or value is 0
+  });
 };
-
-
 
 
   useEffect(() => {
@@ -198,21 +275,15 @@ const cellRender = (x: number, y: number, value: number | null): JSX.Element | n
         // Fetch and transform data from Firebase
         const fetchedHeatmapData = await getHeatmapDataFromFirebase();
       
-        // Now increment the problemCount for each point
-        fetchedHeatmapData.forEach((point) => {
-          // This assumes every document represents a problem, and thus increments the problem count.
-          point.problemCount += 1;
-        });
+        // Transform the data for heatmap display
+        const displayData = transformToHeatmapDisplayData(fetchedHeatmapData);
       
-        // Continue with the rest of your code
-        setHeatmapData(fetchedHeatmapData);
-        transformToGridData(fetchedHeatmapData);
+        // Set the transformed data to state
+        setTransformedHeatmapData(displayData);
       };
-      
-      fetchHeatmapData(); // Call the function here, outside itself
+       
       
     
-
       const fetchUserCount = async () => {
         const userSnapshot = await getDocs(collection(db, 'users'));
         setTotalUsers(userSnapshot.size);
@@ -442,33 +513,36 @@ const cellRender = (x: number, y: number, value: number | null): JSX.Element | n
             </ResponsiveContainer>
           </div>
 
-       {/* HeatMap for problem Locations */}
-       <div
-        style={{
-          boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
-          padding: '20px',
-          borderRadius: '12px',
-          backgroundColor: '#fff',
-          gridColumn: '1 / span 2', 
-          gridRow: '5 / span 3', 
-        }}
-        className='heatmap-container'
-      >
-        <h4 style={{ textAlign: 'center', marginBottom: '20px', fontWeight: 'bold' }}>
-          Heatmap of Problem Locations
-        </h4>
-        {gridData.length > 0 ? (
-          <HeatMap
-            xLabels={xLabels}
-            yLabels={['']}
-            data={gridData}
-            cellStyle={cellStyle}
-            cellRender={cellRender}
-          />
-        ) : null}
-      </div>
-
-
+          {/* HeatMap for problem Locations */}
+          {
+            transformedHeatmapData.length > 0 && (
+              <div style={{
+                boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+                padding: '20px',
+                borderRadius: '12px',
+                backgroundColor: '#fff',
+                gridColumn: '1 / span 2', // spans two columns
+                gridRow: '5', // fourth row
+              }} className="heatmap">
+                <h3 style={{ textAlign: 'center', marginBottom: '20px', color: '#333', fontWeight: 'bold' }}>Problem Locations</h3> {/* Bold title */}
+                {transformedHeatmapData.map((data) => {
+                  const maxProblemCount = Math.max(...transformedHeatmapData.map(d => d.problemCount));
+                  const style = cellStyle(data.problemCount, maxProblemCount); // Use cellStyle here
+                  return (
+                    <div 
+                      key={data.areaName}
+                      style={{
+                        ...transformCoordinatesToPosition(data.latitude, data.longitude, containerWidth, containerHeight),
+                        ...style // Apply cellStyle
+                      }}
+                    >
+                      {data.areaName} ({data.problemCount})
+                    </div>
+                  );
+                })}
+              </div>
+            )
+          }
 
 
       {/* Bar Chart for Number of Problems by Class */}
