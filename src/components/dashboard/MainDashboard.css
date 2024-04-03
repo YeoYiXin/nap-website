@@ -1,0 +1,57 @@
+  .heatmap-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .heatmap {
+    position: relative;
+    width: 100%;
+    height: 500px; 
+    background: #f8f8f8; 
+  }
+  
+  .heatmap-point {
+    position: absolute;
+    background-color: #ff4500;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3s ease-in-out;
+    cursor: pointer;
+  }
+
+  .heatmap-point span {
+    position: absolute;
+    bottom: -20px; 
+    left: 50%;
+    transform: translateX(-50%); 
+    white-space: nowrap;
+  }
+    
+  .heatmap-point:hover {
+    background-color: #ff6347; 
+  }
+  
+  .heatmap-point:hover::after {
+    content: attr(data-title); 
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #fff; 
+    padding: 2px 5px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  }
+  
+
+  .heatmap-point::after {
+    content: attr(data-title);
+    position: absolute;
+    top: 100%;
+    white-space: nowrap;
+    font-size: 12px;
+    color: black;
+  }
