@@ -16,7 +16,14 @@ export default function Home() {
 
   return (
     <>
+<<<<<<< Updated upstream
       <div className="bg-white flex min-h-screen">
+=======
+      <div
+        className="bg-white flex min-h-screen"
+        style={{ paddingLeft: "10rem" }}
+      >
+>>>>>>> Stashed changes
         <NavBar onSectionClick={handlePageClick} />
 
         {/* Main content - statistics first*/}

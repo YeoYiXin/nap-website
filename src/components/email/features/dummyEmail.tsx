@@ -154,6 +154,7 @@ Props) => {
             ? email.problemStatus === "In Progress"
             : email.problemStatus === "Done"
         )
+        .reverse()
         .map((email) => {
           const isClicked = clickedEmails[email.problemId];
           const previousEmailContent = localStorage.getItem(email.problemId);

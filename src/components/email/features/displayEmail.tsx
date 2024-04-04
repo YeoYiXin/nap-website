@@ -374,10 +374,10 @@ const DisplayEmail = ({ selectedEmail }: Props) => {
                 <div className="flex-1 flex flex-col">
                   <div>
                     <p className="font-bold">
-                      Solved - activate approval status, if approved, then done
+                      Solved
                     </p>
                   </div>
-                  <div>{"--"}Solved Image</div>
+                  <div></div>
                 </div>
               </div>
 
