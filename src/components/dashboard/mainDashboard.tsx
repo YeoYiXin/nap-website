@@ -74,6 +74,7 @@ const MainDashboard: React.FC = () => {
   const [gridData, setGridData] = useState<number[][]>([]);
   const [transformedHeatmapData, setTransformedHeatmapData] = useState<any[]>([]);
   const [hoveredCell, setHoveredCell] = useState<{ x: number; y: number; } | null>(null);
+  
 
 // This function transforms the fetched heatmap data for display.
 const transformToHeatmapDisplayData = (fetchedHeatmapData: HeatmapPoint[]): HeatmapDisplayData[] => {
@@ -131,7 +132,7 @@ const transformCoordinatesToPosition = (
 
 const cellStyle = (problemCount: number, maxProblemCount: number): React.CSSProperties => {
   const maxSize = 50; // Maximum size of the circle
-  const size = (problemCount / maxProblemCount) * maxSize; // Calculate size relative to the max count
+  const size = Math.max((problemCount / maxProblemCount) * maxSize, 10); // Calculate size, with a minimum size to ensure visibility
 
   return {
     display: 'flex',
@@ -140,44 +141,58 @@ const cellStyle = (problemCount: number, maxProblemCount: number): React.CSSProp
     background: '#ff4500', // Color of the circle
     borderRadius: '50%', // Make it round
     width: `${size}px`, // Set width based on the problemCount
-    height: `${size}px`, // Set height based on the problemCount
-    position: 'absolute', // Absolute positioning within the heatmap
+    height: `${size}px`, // Ensure height is the same as width to maintain circle shape
+    position: 'absolute' as 'absolute', // Absolute positioning within the heatmap
     transform: 'translate(-50%, -50%)', // Center the circle
     margin: 'auto'
   };
 };
 
-const containerWidth = window.innerWidth; // Get the width of the window
-const containerHeight = window.innerHeight; // Get the height of the window
+const containerWidth = document.querySelector('.heatmap')?.clientWidth || 0;
+const containerHeight = document.querySelector('.heatmap')?.clientHeight || 0;
 
-// Render function for your component
+
 const renderHeatmap = (data: HeatmapDisplayData[]) => {
   // Find the maximum problem count for scaling
   const maxProblemCount = Math.max(...data.map(d => d.problemCount));
 
-  // Now render your heatmap points
   return data.map(point => {
-    const size = calculateSizeBasedOnValue(point.problemCount, maxProblemCount);
-    const position = transformCoordinatesToPosition(point.latitude, point.longitude, containerWidth, containerHeight);
+    const dotPosition = transformCoordinatesToPosition(point.latitude, point.longitude, containerWidth, containerHeight);
+    const dotStyle = cellStyle(point.problemCount, maxProblemCount);
+
+    // Define position for the label here, positioning it above the dot using the bottom property
+    const labelStyle: React.CSSProperties = {
+      position: 'absolute',
+      left: dotPosition.left,
+      bottom: `calc(100% - ${dotPosition.top} + 10px)`, // Adjust bottom position based on the top of the dot plus an offset
+      transform: 'translateX(-50%)',
+      whiteSpace: 'nowrap',
+      zIndex: 10,
+      background: '#fff',
+      padding: '2px 5px',
+      borderRadius: '3px',
+      boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
+      fontSize: '12px',
+      color: '#333',
+      textAlign: 'center',
+      pointerEvents: 'none',
+    };
 
     return (
-      <div key={point.areaName} className="location-point" style={{
-        position: 'absolute',
-        ...position,
-        width: `${size}px`,
-        height: `${size}px`,
-        borderRadius: '50%', // To make the divs circular
-        backgroundColor: '#ff4500', // Color of your circles
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        // ... any additional styling you need
-      }}>
-        <span>{point.areaName} ({point.problemCount})</span>
-      </div>
+      <>
+        {/* The dot itself */}
+        <div className="heatmap-point" style={dotStyle} />
+        
+        {/* The label, positioned absolutely in relation to the heatmap container */}
+        <div className="heatmap-label" style={labelStyle}>
+          {point.areaName} ({point.problemCount})
+        </div>
+      </>
     );
   });
 };
+
+
 
 
   useEffect(() => {
@@ -543,7 +558,6 @@ const renderHeatmap = (data: HeatmapDisplayData[]) => {
               </div>
             )
           }
-
 
       {/* Bar Chart for Number of Problems by Class */}
           <div style={{
