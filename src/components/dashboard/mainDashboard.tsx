@@ -528,37 +528,6 @@ const renderHeatmap = (data: HeatmapDisplayData[]) => {
             </ResponsiveContainer>
           </div>
 
-          {/* HeatMap for problem Locations */}
-          {
-            transformedHeatmapData.length > 0 && (
-              <div style={{
-                boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
-                padding: '20px',
-                borderRadius: '12px',
-                backgroundColor: '#fff',
-                gridColumn: '1 / span 2', // spans two columns
-                gridRow: '5', // fourth row
-              }} className="heatmap">
-                <h3 style={{ textAlign: 'center', marginBottom: '20px', color: '#333', fontWeight: 'bold' }}>Problem Locations</h3> {/* Bold title */}
-                {transformedHeatmapData.map((data) => {
-                  const maxProblemCount = Math.max(...transformedHeatmapData.map(d => d.problemCount));
-                  const style = cellStyle(data.problemCount, maxProblemCount); // Use cellStyle here
-                  return (
-                    <div 
-                      key={data.areaName}
-                      style={{
-                        ...transformCoordinatesToPosition(data.latitude, data.longitude, containerWidth, containerHeight),
-                        ...style // Apply cellStyle
-                      }}
-                    >
-                      {data.areaName} ({data.problemCount})
-                    </div>
-                  );
-                })}
-              </div>
-            )
-          }
-
       {/* Bar Chart for Number of Problems by Class */}
           <div style={{
             boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
