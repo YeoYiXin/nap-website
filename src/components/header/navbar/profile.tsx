@@ -17,7 +17,7 @@ const profile = () => {
 
       <div className="ml-2 text-white text-sm">
         {/* Hello, username */}
-       <p className="font-bold">username</p>
+       <p className="font-bold">Admin</p>
       </div>
     </div>
   );

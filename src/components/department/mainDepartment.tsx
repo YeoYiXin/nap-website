@@ -51,7 +51,7 @@ const mainDepartment: React.FC = () => {
 
   return (
     <div className="flex flex-col flex-grow h-screen p-4">
-      <h1 className="font-bold text-4xl mb-4">Teams</h1>
+      <h1 className="font-bold text-4xl mb-4">Department</h1>
       <div className="grid grid-cols-4 gap-4">
         {teams.map((team, index) => (
           <div key={index} className="shadow-lg rounded-lg flex flex-col items-center p-4 m-2" style={{ height: '380px' }}>
