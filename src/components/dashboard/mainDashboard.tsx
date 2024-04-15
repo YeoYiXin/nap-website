@@ -411,7 +411,7 @@ const renderHeatmap = (data: HeatmapDisplayData[]) => {
     return (
       
       <div>
-        <h1 style={{ textAlign: 'left', marginTop: '20px', fontSize: '36px', fontWeight: 'bold' }}>Dashboard</h1>
+        <h1 className="font-bold text-3xl mb-1 ml-5">Dashboard</h1>
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(2, 1fr)', 
