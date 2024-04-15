@@ -2,14 +2,9 @@
 import React, { useEffect, useState } from "react";
 // import { clientApp, db } from "../../../firebase/clientApp";
 import { db } from "../../../firebase/clientApp";
-import {
-  collection,
-  onSnapshot,
-} from "firebase/firestore";
+import { collection, onSnapshot } from "firebase/firestore";
 
 import Template from "./receiveTemplate";
-import { error } from "console";
-import { get } from "http";
 
 interface Props {
   onEmailClick: (email: FirestoreEmail) => void;
@@ -114,6 +109,13 @@ Props) => {
     }
   };
 
+  // return integer
+  const parseWorkOrderId = (id: string) => {
+    // Assuming the ID format is `#WA-<number>`
+    const matches = id.match(/#WA-(\d+)/);
+    return matches ? parseInt(matches[1], 10) : 0;
+  };
+
   return (
     <div className="py-2 cursor-pointer">
       {emails
@@ -156,6 +158,10 @@ Props) => {
             ? email.problemStatus === "In Progress"
             : email.problemStatus === "Done"
         )
+        .sort(
+          (a, b) =>
+            parseWorkOrderId(b.problemId) - parseWorkOrderId(a.problemId)
+        ) // Sorting in descending order
         .map((email) => {
           const isClicked = clickedEmails[email.problemId];
           const previousEmailContent = localStorage.getItem(email.problemId);
@@ -180,7 +186,6 @@ Props) => {
             </div>
           );
         })}
-        
     </div>
   );
 };
