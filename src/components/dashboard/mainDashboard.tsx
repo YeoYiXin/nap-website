@@ -496,37 +496,40 @@ const renderHeatmap = (data: HeatmapDisplayData[]) => {
           </ResponsiveContainer>
       </div>
 
-          {/* Pie Chart for Problem Status */}
-          <div style={{
-            boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
-            padding: '20px',
-            borderRadius: '12px',
-            backgroundColor: '#fff',
-            gridColumn: '2 / 3', // second column
-            gridRow: '1 / 2', // first row
-          }}>
-            <h4 style={{ textAlign: 'center', marginBottom: '20px', color: '#333' , fontWeight: 'bold'}}>Problem Status Distribution</h4>
-            <ResponsiveContainer width="100%" height={300} >
-              <PieChart>
-                <Pie
-                  dataKey="value"
-                  isAnimationActive={true}
-                  data={statusData}
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={100}
-                  fill="#8884d8"
-                  labelLine={false}
-                  label={renderCustomizedLabel}
-                >
-                  {statusData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
+{/* Pie Chart for Problem Status */}
+<div style={{
+  boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+  padding: '20px',
+  borderRadius: '12px',
+  backgroundColor: '#fff',
+  gridColumn: '2 / 3', // second column
+  gridRow: '1 / 2', // first row
+}}>
+  <h4 style={{ textAlign: 'center', marginBottom: '20px', color: '#333', fontWeight: 'bold' }}>Problem Status Distribution</h4>
+  <ResponsiveContainer width="100%" height={300}>
+    <PieChart>
+      <Pie
+        dataKey="value"
+        isAnimationActive={true}
+        data={statusData}
+        cx="50%"
+        cy="50%"
+        outerRadius={100}
+        fill="#8884d8"
+        labelLine={false}
+        label={renderCustomizedLabel}
+      >
+        {statusData.map((entry, index) => (
+          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+        ))}
+      </Pie>
+      <Tooltip />
+      {/* Legend */}
+      <Legend align="center" verticalAlign="bottom" iconSize={10} />
+    </PieChart>
+  </ResponsiveContainer>
+</div>
+
 
       {/* Bar Chart for Number of Problems by Class */}
           <div style={{
