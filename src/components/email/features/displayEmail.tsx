@@ -15,11 +15,12 @@ import {
   deleteDoc,
   updateDoc,
   onSnapshot,
+  Timestamp,
 } from "firebase/firestore";
 
 interface Props {
   selectedEmail: {
-    date: string;
+    date: Timestamp;
     pIndoorLocation: string;
     problemClass: string;
     problemDepartment: string;
@@ -53,7 +54,7 @@ const DisplayEmail = ({ selectedEmail }: Props) => {
 
   const [editedEmail, setEditedEmail] = useState(
     selectedEmail ?? {
-      date: "",
+      date: Timestamp.now(),
       pIndoorLocation: "",
       problemClass: "",
       problemDepartment: "",
@@ -89,7 +90,7 @@ const DisplayEmail = ({ selectedEmail }: Props) => {
         if (docSnapshot.exists()) {
           console.log("hi reach here, ediiiiiiit");
           const updatedEmailData = docSnapshot.data() as {
-            date: string;
+            date: Timestamp;
             pIndoorLocation: string;
             problemClass: string;
             problemDepartment: string;
@@ -346,7 +347,11 @@ const DisplayEmail = ({ selectedEmail }: Props) => {
                   <p className="font-bold">Time{": "}</p>
                 </div>
                 <div className="px-5 flex flex-row items-start justify-center">
-                  {selectedEmail.date}
+                  {
+                    selectedEmail.date instanceof Date // Check if it's already a Date object
+                      ? selectedEmail.date.toLocaleString() // If so, format directly
+                      : selectedEmail.date.toDate().toLocaleString() // If not, convert Timestamp to Date and format
+                  }
                 </div>
               </div>
             </div>
@@ -379,9 +384,7 @@ const DisplayEmail = ({ selectedEmail }: Props) => {
                 </div>
                 <div className="flex-1 flex flex-col">
                   <div>
-                    <p className="font-bold">
-                      Solved 
-                    </p>
+                    <p className="font-bold">Solved</p>
                   </div>
                 </div>
               </div>
@@ -395,7 +398,10 @@ const DisplayEmail = ({ selectedEmail }: Props) => {
                   {selectedEmail.problemLocation}
                 </div>
                 <div className="mb-4">
-                  <Location latitude={selectedEmail.latitude} longitude={selectedEmail.longitude} />
+                  <Location
+                    latitude={selectedEmail.latitude}
+                    longitude={selectedEmail.longitude}
+                  />
                 </div>
               </div>
             </div>
