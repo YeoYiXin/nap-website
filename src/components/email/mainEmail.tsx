@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 // import SearchBox from "./features/searchBox";
 import AssignedToButton from "./buttons/assignedTo";
 import PriorityButton from "./buttons/priority";
@@ -7,10 +7,10 @@ import ProblemClassButton from "./buttons/problemClass";
 import LocationButton from "./buttons/location";
 import ReceiveEmails from "./features/receiveEmails";
 import DisplayEmail from "./features/displayEmail";
-import { db } from "@/firebase/clientApp";
+import { Timestamp } from "@firebase/firestore";
 
 interface FirestoreEmail {
-  date: string;
+  date: Timestamp;
   pIndoorLocation: string;
   problemClass: string;
   problemDepartment: string;
@@ -28,7 +28,7 @@ interface FirestoreEmail {
   longitude: number;
 }
 
-const mainEmail = () => {
+const MainEmail = () => {
   const [selectedEmail, setSelectedEmail] = useState<FirestoreEmail | null>(
     null
   );
@@ -39,26 +39,6 @@ const mainEmail = () => {
   >([]);
   const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
   const [selectedPriorities, setSelectedPriorities] = useState<string>("");
-  // Define state to track clicked emails
-  //  // Fetch clicked emails data from localStorage when component mounts
-  //  useEffect(() => {
-  //   const localStorageClickedEmails = localStorage.getItem('clickedEmails');
-  //   if (localStorageClickedEmails) {
-  //     const clickedEmailsData = JSON.parse(localStorageClickedEmails);
-  //     // Here you can set the state or perform any other necessary actions with the clicked emails data
-  //   }
-  // }, []);
-  // const [clickedEmails, setClickedEmails] = useState<Record<string, boolean>>(
-  //   {}
-  // );
-
-  // useEffect(() => {
-  //   // Fetch clicked emails data from localStorage when component mounts
-  //   const localStorageClickedEmails = localStorage.getItem("clickedEmails");
-  //   if (localStorageClickedEmails) {
-  //     setClickedEmails(JSON.parse(localStorageClickedEmails));
-  //   }
-  // }, []);
 
   // Define departmentOptions here
   const departmentOptions = [
@@ -189,25 +169,6 @@ const mainEmail = () => {
   ];
 
   const handleEmailClick = (email: FirestoreEmail) => {
-    // Update clicked emails state and store it in localStorage
-    // const clickedEmailsData = localStorage.getItem('clickedEmails');
-    // const updatedClickedEmails = clickedEmailsData ? JSON.parse(clickedEmailsData) : {};
-    // updatedClickedEmails[email.problemId] = true;
-    // localStorage.setItem('clickedEmails', JSON.stringify(updatedClickedEmails));
-
-    // if (!clickedEmails[email.problemId]) {
-    //   // Update clicked emails state and store it in localStorage
-    //   const updatedClickedEmails = {
-    //     ...clickedEmails,
-    //     [email.problemId]: true,
-    //   };
-    //   console.log("Main email updatedClickedEmails:", updatedClickedEmails);
-    //   setClickedEmails(updatedClickedEmails);
-    //   localStorage.setItem(
-    //     "clickedEmails",
-    //     JSON.stringify(updatedClickedEmails)
-    //   );
-    // }
     setSelectedEmail(email);
   };
 
@@ -221,7 +182,6 @@ const mainEmail = () => {
             {/* for work orders */}
 
             <h1 className="font-bold text-3xl mb-1">Work Orders</h1>
-
           </div>
         </div>
         <div className="flex flex-row gap-4 py-2 mb-1">
@@ -278,10 +238,9 @@ const mainEmail = () => {
             selectedProblemClasses={selectedProblemClasses} // Pass selected problem classes
             selectedLocations={selectedLocations} // Pass selected locations
             selectedPriorities={selectedPriorities} // Pass selected priorities
-            // clickedEmails={clickedEmails} // Pass clicked emails state
           />
         </div>
-        <div>
+        <div> 
           <DisplayEmail selectedEmail={selectedEmail} />
         </div>
       </div>
@@ -289,4 +248,4 @@ const mainEmail = () => {
   );
 };
 
-export default mainEmail;
+export default MainEmail;

@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 // import { clientApp, db } from "../../../firebase/clientApp";
 import { db } from "../../../firebase/clientApp";
-import { collection, onSnapshot } from "firebase/firestore";
+import { collection, onSnapshot, Timestamp } from "firebase/firestore";
 
 import Template from "./receiveTemplate";
 
@@ -13,11 +13,10 @@ interface Props {
   selectedProblemClasses: string[]; // Added selectedProblemClasses prop
   selectedLocations: string[]; // Added selectedLocations prop
   selectedPriorities: string; // Added selectedPriorities prop
-  // clickedEmails: Record<string, boolean>;
 }
 
 interface FirestoreEmail {
-  date: string;
+  date: Timestamp;
   pIndoorLocation: string;
   problemClass: string;
   problemDepartment: string;

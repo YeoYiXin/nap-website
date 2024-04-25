@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { LuDot } from "react-icons/lu";
 import DummyEmail from "./dummyEmail";
+import { Timestamp } from "@firebase/firestore";
 
 interface Props {
   onEmailClick: (email: FirestoreEmail) => void;
@@ -13,7 +14,7 @@ interface Props {
 }
 
 interface FirestoreEmail {
-  date: string;
+  date: Timestamp;
   pIndoorLocation: string;
   problemClass: string;
   problemDepartment: string;
@@ -37,8 +38,8 @@ const ReceiveEmails = ({
   selectedProblemClasses,
   selectedLocations,
   selectedPriorities,
-  // clickedEmails,
-}: Props) => {
+}: // clickedEmails,
+Props) => {
   const [active, setActive] = useState("To do");
 
   const handleClick = (section: React.SetStateAction<string>) => {
@@ -81,14 +82,17 @@ const ReceiveEmails = ({
       </div>
       <div className="border-b-2 border-gray-400 border-opacity-30 py-2 px-2">
         {/* put list of studd that is added in filter */}
-        <p>Filter By:
-          {selectedDepartments.length === 0 && selectedProblemClasses.length === 0 && selectedLocations.length === 0 && selectedPriorities.length === 0 
+        <p>
+          Filter By:
+          {selectedDepartments.length === 0 &&
+          selectedProblemClasses.length === 0 &&
+          selectedLocations.length === 0 &&
+          selectedPriorities.length === 0
             ? " None;"
             : `${selectedDepartments.length > 0 ? " Department;" : ""}
                ${selectedProblemClasses.length > 0 ? " Problem Class;" : ""}
                ${selectedLocations.length > 0 ? " Location;" : ""}
-               ${selectedPriorities.length > 0 ? " Priority;" : ""}`
-          }
+               ${selectedPriorities.length > 0 ? " Priority;" : ""}`}
         </p>
       </div>
       <div className="flex flex-col flex-grow overflow-y-auto">
@@ -99,10 +103,7 @@ const ReceiveEmails = ({
           selectedProblemClasses={selectedProblemClasses}
           selectedLocations={selectedLocations}
           selectedPriorities={selectedPriorities}
-          // clickedEmails={clickedEmails}
         />
-
-        {/* Email section: {active} */}
       </div>
     </div>
   );
