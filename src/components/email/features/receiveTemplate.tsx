@@ -3,11 +3,11 @@ import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import UserProfile from "../../../../public/userProfile.png";
 import { LuDot } from "react-icons/lu";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, Timestamp } from "firebase/firestore";
 import { db } from "@/firebase/clientApp";
 
 interface Props {
-  date: string;
+  date: Timestamp;
   pIndoorLocation: string;
   problemClass: string;
   problemDepartment: string;
