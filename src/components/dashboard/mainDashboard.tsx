@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line // Added LineChart and Line
 } from 'recharts';
 import { isPointInPolygon } from 'geolib';
 import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, getDocs } from 'firebase/firestore';
+
 import { areaPolygons } from './location';
 import HeatMap from 'react-heatmap-grid';
 import './MainDashboard.css';
+import PieChartLocations from './PieChartLocations';
+import PieChartProblems from './PieChartProblem';
 
 // Firebase config and initialization
 const firebaseConfig = {
@@ -63,6 +66,16 @@ interface TransformedData {
   yValue: number;
 }
 
+ // Mock data for issue reports over a period of a month
+ const weeklyReportData = [
+  { week: 'Week 1', issues: 10 },
+  { week: 'Week 2', issues: 15 },
+  { week: 'Week 3', issues: 20 },
+  { week: 'Week 4', issues: 12 },
+ 
+];
+
+
 const MainDashboard: React.FC = () => {
   const [departmentData, setDepartmentData] = useState<DepartmentData[]>([]);
   const [statusData, setStatusData] = useState<StatusData[]>([]);
@@ -70,129 +83,6 @@ const MainDashboard: React.FC = () => {
   const [indoorOutdoorData, setIndoorOutdoorData] = useState<StatusData[]>([]);
   const [totalUsers, setTotalUsers] = useState<number>(0);
   const [classData, setClassData] = useState<ClassData[]>([]);
-  const [heatmapData, setHeatmapData] = useState<HeatmapPoint[]>([]);
-  const [gridData, setGridData] = useState<number[][]>([]);
-  const [transformedHeatmapData, setTransformedHeatmapData] = useState<any[]>([]);
-  const [hoveredCell, setHoveredCell] = useState<{ x: number; y: number; } | null>(null);
-  
-
-// This function transforms the fetched heatmap data for display.
-const transformToHeatmapDisplayData = (fetchedHeatmapData: HeatmapPoint[]): HeatmapDisplayData[] => {
-  const heatmapDisplayData: Record<string, HeatmapDisplayData> = {};
-
-  // Iterate over the fetched heatmap data to group by areaName
-  fetchedHeatmapData.forEach(point => {
-    // If areaName is defined and it's a new area, initialize it in the heatmapDisplayData
-    if (point.areaName && !heatmapDisplayData[point.areaName]) {
-      heatmapDisplayData[point.areaName] = {
-        areaName: point.areaName,
-        problemCount: 0, // Initialize problemCount for this area
-        latitude: point.latitude, // Assume the first point's latitude and longitude represent the area
-        longitude: point.longitude
-      };
-    }
-
-    // Aggregate the problemCount for each area
-    if (point.areaName) {
-      heatmapDisplayData[point.areaName].problemCount += point.problemCount;
-    }
-  });
-
-  // Convert the heatmapDisplayData object into an array of values
-  return Object.values(heatmapDisplayData);
-};
-
-const calculateSizeBasedOnValue = (value: number, maxValue: number): number => {
-  const maxSize = 100; // Define the maximum size of your circles
-  return (value / maxValue) * maxSize; // This gives you a size relative to the maximum value
-};
-
-const transformCoordinatesToPosition = (
-  latitude: number,
-  longitude: number,
-  containerWidth: number,
-  containerHeight: number
-) => {
-  // Placeholder: These should be your actual min and max latitude and longitude
-  const minLat = -90;
-  const maxLat = 90;
-  const minLng = -180;
-  const maxLng = 180;
-
-  // Convert latitude and longitude to a percentage of the container dimensions
-  const xPercent = ((longitude - minLng) / (maxLng - minLng)) * containerWidth;
-  const yPercent = ((latitude - minLat) / (maxLat - minLat)) * containerHeight;
-
-  return {
-    left: `${xPercent}px`,
-    top: `${yPercent}px`,
-  };
-};
-
-
-const cellStyle = (problemCount: number, maxProblemCount: number): React.CSSProperties => {
-  const maxSize = 50; // Maximum size of the circle
-  const size = Math.max((problemCount / maxProblemCount) * maxSize, 10); // Calculate size, with a minimum size to ensure visibility
-
-  return {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    background: '#ff4500', // Color of the circle
-    borderRadius: '50%', // Make it round
-    width: `${size}px`, // Set width based on the problemCount
-    height: `${size}px`, // Ensure height is the same as width to maintain circle shape
-    position: 'absolute' as 'absolute', // Absolute positioning within the heatmap
-    transform: 'translate(-50%, -50%)', // Center the circle
-    margin: 'auto'
-  };
-};
-
-const containerWidth = document.querySelector('.heatmap')?.clientWidth || 0;
-const containerHeight = document.querySelector('.heatmap')?.clientHeight || 0;
-
-
-const renderHeatmap = (data: HeatmapDisplayData[]) => {
-  // Find the maximum problem count for scaling
-  const maxProblemCount = Math.max(...data.map(d => d.problemCount));
-
-  return data.map(point => {
-    const dotPosition = transformCoordinatesToPosition(point.latitude, point.longitude, containerWidth, containerHeight);
-    const dotStyle = cellStyle(point.problemCount, maxProblemCount);
-
-    // Define position for the label here, positioning it above the dot using the bottom property
-    const labelStyle: React.CSSProperties = {
-      position: 'absolute',
-      left: dotPosition.left,
-      bottom: `calc(100% - ${dotPosition.top} + 10px)`, // Adjust bottom position based on the top of the dot plus an offset
-      transform: 'translateX(-50%)',
-      whiteSpace: 'nowrap',
-      zIndex: 10,
-      background: '#fff',
-      padding: '2px 5px',
-      borderRadius: '3px',
-      boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
-      fontSize: '12px',
-      color: '#333',
-      textAlign: 'center',
-      pointerEvents: 'none',
-    };
-
-    return (
-      <>
-        {/* The dot itself */}
-        <div className="heatmap-point" style={dotStyle} />
-        
-        {/* The label, positioned absolutely in relation to the heatmap container */}
-        <div className="heatmap-label" style={labelStyle}>
-          {point.areaName} ({point.problemCount})
-        </div>
-      </>
-    );
-  });
-};
-
-
 
 
   useEffect(() => {
@@ -267,38 +157,7 @@ const renderHeatmap = (data: HeatmapDisplayData[]) => {
           { name: 'Outdoor', value: outdoorCount }
         ]);
       };
-
-      const getHeatmapDataFromFirebase = async (): Promise<HeatmapPoint[]> => {
-        const heatmapDataPoints: HeatmapPoint[] = [];
-        const querySnapshot = await getDocs(collection(db, 'problemsRecord'));
-        querySnapshot.forEach((doc) => {
-          const data = doc.data();
-          const point: HeatmapPoint = { latitude: data.latitude, longitude: data.longitude, problemCount: 0 };
-
-          for (const areaName in areaPolygons) {
-            const polygon = areaPolygons[areaName].map(({ lat, lng }) => ({ latitude: lat, longitude: lng }));
-            if (isPointInPolygon(point, polygon)) {
-              heatmapDataPoints.push({ ...point, areaName });
-              break;
-            }
-          }
-        });
-        return heatmapDataPoints;
-      };
-
-      const fetchHeatmapData = async () => {
-        // Fetch and transform data from Firebase
-        const fetchedHeatmapData = await getHeatmapDataFromFirebase();
-      
-        // Transform the data for heatmap display
-        const displayData = transformToHeatmapDisplayData(fetchedHeatmapData);
-      
-        // Set the transformed data to state
-        setTransformedHeatmapData(displayData);
-      };
-       
-      
-    
+ 
       const fetchUserCount = async () => {
         const userSnapshot = await getDocs(collection(db, 'users'));
         setTotalUsers(userSnapshot.size);
@@ -309,7 +168,6 @@ const renderHeatmap = (data: HeatmapDisplayData[]) => {
       await fetchStatusDistribution();
       await fetchPriorityDistribution();
       await fetchIndoorOutdoorCounts();
-      await fetchHeatmapData();
       await fetchUserCount();
     };
 
@@ -347,66 +205,7 @@ const renderHeatmap = (data: HeatmapDisplayData[]) => {
     };
     const PIE_COLORS = ['#0088FE', '#00C49F', '#FFBB28'];
 
-
-    const getHeatmapDataFromFirebase = async (): Promise<HeatmapPoint[]> => {
-      const querySnapshot = await getDocs(collection(db, 'problemsRecord'));
-      const heatmapDataPoints: HeatmapPoint[] = [];
-  
-      querySnapshot.forEach(doc => {
-        const data = doc.data();
-        const point: HeatmapPoint = { latitude: data.latitude, longitude: data.longitude, problemCount: 0 };
-
-        
-        Object.entries(areaPolygons).forEach(([areaName, coordinates]) => {
-          const polygon = coordinates.map(coord => ({ latitude: coord.lat, longitude: coord.lng }));
-          if (isPointInPolygon(point, polygon)) {
-            heatmapDataPoints.push({ ...point, areaName });
-          }
-        });
-      });
-  
-      return heatmapDataPoints;
-    };
-  
-    const transformToGridData = (heatmapData: HeatmapPoint[]) => {
-      const MAX_COLUMNS = 10; 
-      const countsMap = new Map<string, number>();
-      
-      
-    
-      heatmapData.forEach((point) => {
-        if (point.areaName) {
-          countsMap.set(point.areaName, (countsMap.get(point.areaName) || 0) + point.problemCount);
-        }
-      });
-    
    
-      const dataPoints = Array.from(countsMap, ([areaName, value]) => ({
-        areaName, value
-      }));
-    
-      
-      let gridData: number[][] = [];
-      let currentRow: number[] = [];
-      dataPoints.forEach((point, index) => {
-        currentRow.push(point.value);
-        if ((index + 1) % MAX_COLUMNS === 0 || index === dataPoints.length - 1) {
-          gridData.push(currentRow);
-          currentRow = []; 
-        }
-      });
-    
- 
-      const yLabels = ['']; 
-      const xLabels = dataPoints.slice(0, MAX_COLUMNS).map(point => point.areaName); 
-    
-      setGridData(gridData);
-      setXLabels(xLabels);
-     
-    };
-    
-    
-    const [xLabels, setXLabels] = useState<string[]>([]);
     
     return (
       
@@ -445,7 +244,14 @@ const renderHeatmap = (data: HeatmapDisplayData[]) => {
           
 
           {/* Pie Chart for Problem Priority */}
-        <div style={{ /* styles for the chart container */ }}>
+          <div style={{
+          boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+          padding: '20px',
+          borderRadius: '12px',
+          backgroundColor: '#fff',
+          gridColumn: '1', // first column
+          gridRow: '3', // start at second row and span 2 rows
+        }}>
           <h4 style={{ textAlign: 'center', marginBottom: '20px', color: '#333' ,fontWeight: 'bold'}}>
             Problem Priority Distribution
           </h4>
@@ -472,6 +278,61 @@ const renderHeatmap = (data: HeatmapDisplayData[]) => {
           </ResponsiveContainer>
         </div>
 
+        {/* Chart for issue reports over a period of a month */}
+        <div style={{
+          boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+          padding: '20px',
+          borderRadius: '12px',
+          backgroundColor: '#fff',
+          gridColumn: '1 / span 2', // spans two columns
+          gridRow: '6', // fifth row
+        }}>
+          <h4 style={{ textAlign: 'center', marginBottom: '20px', color: '#333', fontWeight: 'bold' }}>
+            Issue Reports Over a Period of a Month
+          </h4>
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart data={weeklyReportData} margin={{ top: 10, right: 20, left: 10, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e3e3e3" />
+              <XAxis dataKey="week" tick={{ fill: '#6c757d' }} />
+              <YAxis yAxisId="left" />
+              <YAxis yAxisId="right" orientation="right" />
+              <Tooltip />
+              <Legend verticalAlign="top" height={36} />
+              {/* Line series */}
+              <Line yAxisId="left" type="monotone" dataKey="issues" stroke="#ff7300" name="Weekly Issues Trend" />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Pie chart for problem locations */}
+        <div style={{
+          boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+          padding: '20px',
+          borderRadius: '12px',
+          backgroundColor: '#fff',
+          gridColumn: '1', // spans two columns
+          gridRow: '5', // fifth row
+        }}><h4 style={{ textAlign: 'center', marginBottom: '20px', color: '#333' ,fontWeight: 'bold'}}>
+        Top 5 Problem Locations
+         </h4>
+        <PieChartLocations />
+        </div>
+
+          {/* Pie chart for problems */}
+        <div style={{
+        boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+        padding: '20px',
+        borderRadius: '12px',
+        backgroundColor: '#fff',
+        gridColumn: '2', // spans two columns
+        gridRow: '5', // fifth row
+        }}><h4 style={{ textAlign: 'center', marginBottom: '20px', color: '#333' ,fontWeight: 'bold'}}>
+        Top 5 Problems
+         </h4>
+        <PieChartProblems />
+        </div>
+
+
         {/* Bar Chart for Number of Problems by Department*/}
         <div style={{
           boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
@@ -479,7 +340,7 @@ const renderHeatmap = (data: HeatmapDisplayData[]) => {
           borderRadius: '12px',
           backgroundColor: '#fff',
           gridColumn: '1 / span 2', // first column
-          gridRow: '3', // start at second row and span 2 rows
+          gridRow: '2', // start at second row and span 2 rows
         }}>
           <h4 style={{ textAlign: 'center', marginBottom: '20px', color: '#333', fontWeight: 'bold' }}>
             Number of Problems by Department
@@ -563,7 +424,7 @@ const renderHeatmap = (data: HeatmapDisplayData[]) => {
             borderRadius: '12px',
             backgroundColor: '#fff',
             gridColumn: '2', 
-            gridRow: '2', 
+            gridRow: '3', 
           }}>
             <h4 style={{ textAlign: 'center', marginBottom: '20px', color: '#333', fontWeight: 'bold' }}>
               Total Users
