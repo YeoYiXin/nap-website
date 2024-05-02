@@ -43,7 +43,7 @@ const MainEmail = () => {
   // Define departmentOptions here
   const departmentOptions = [
     { name: "Accommodation Team", id: "Accommodation Team" },
-    { name: "Air-Conditioner Team", id: "Air-Conditioner Team" },
+    { name: "Air Conditioning Team", id: "Air Conditioning Team" },
     { name: "Civil Team", id: "Civil Team" },
     { name: "Cleaning Team", id: "Cleaning Team" },
     { name: "Furniture Team", id: "Furniture Team" },
@@ -165,7 +165,7 @@ const MainEmail = () => {
   const priorityOptions = [
     { name: "Low", id: "Low" },
     { name: "Medium", id: "Medium" },
-    { name: "High", id: "High" },
+    { name: "High", id: "high" },
   ];
 
   const handleEmailClick = (email: FirestoreEmail) => {
@@ -240,7 +240,7 @@ const MainEmail = () => {
             selectedPriorities={selectedPriorities} // Pass selected priorities
           />
         </div>
-        <div> 
+        <div className="">
           <DisplayEmail selectedEmail={selectedEmail} />
         </div>
       </div>

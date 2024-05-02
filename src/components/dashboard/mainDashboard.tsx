@@ -7,7 +7,6 @@ import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, getDocs } from 'firebase/firestore';
 
 import { areaPolygons } from './location';
-import HeatMap from 'react-heatmap-grid';
 import './MainDashboard.css';
 import PieChartLocations from './PieChartLocations';
 import PieChartProblems from './PieChartProblem';
