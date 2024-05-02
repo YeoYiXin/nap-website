@@ -1,4 +1,4 @@
-//signout button
+// Written by Grp B
 import React from "react";
 
 const signout = () => {

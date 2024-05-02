@@ -1,3 +1,4 @@
+// Written by Grp B
 import React from "react";
 import Image from "next/image";
 import UserProfile from "../../../../public/userProfile.png";

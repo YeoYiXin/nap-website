@@ -1,3 +1,4 @@
+// Written by Grp B
 "use client";
 import React, { useState } from "react";
 import { LuDot } from "react-icons/lu";
@@ -10,7 +11,6 @@ interface Props {
   selectedProblemClasses: string[];
   selectedLocations: string[];
   selectedPriorities: string;
-  // clickedEmails: Record<string, boolean>;
 }
 
 interface FirestoreEmail {

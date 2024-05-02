@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+// Written by Grp B
+import React from "react";
 import { BiMessageAltError } from "react-icons/bi";
 
 interface PriorityClassOption {

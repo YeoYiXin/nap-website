@@ -1,4 +1,4 @@
-// displayEmail.jsx
+// Written by Grp B
 "use client";
 import React, { useState, useEffect } from "react";
 import EditButton from "../buttons/display_email/edit";

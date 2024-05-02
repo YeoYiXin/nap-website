@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+// Written by Grp B
+import React from "react";
 import { MdOutlineLocationOn } from "react-icons/md";
 
 interface LocationOption {

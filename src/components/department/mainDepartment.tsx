@@ -1,3 +1,4 @@
+// Written by Grp B
 import React, { useEffect, useState } from 'react';
 import accommodation from '../../../public/teamIcons/home.png';
 import aircon from '../../../public/teamIcons/air-conditioner.png';
