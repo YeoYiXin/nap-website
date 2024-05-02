@@ -1,4 +1,6 @@
+// Written by Grp B
 import React from "react";
+
 interface Props {
   onClick: () => void;
   isActive: boolean;

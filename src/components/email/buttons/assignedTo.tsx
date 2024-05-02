@@ -1,3 +1,4 @@
+// Written by Grp B
 import React from "react";
 import { GoPerson } from "react-icons/go";
 

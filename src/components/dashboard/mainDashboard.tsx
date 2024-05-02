@@ -1,3 +1,4 @@
+// Written by Grp B
 import React, { useEffect, useState } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line // Added LineChart and Line
@@ -5,8 +6,8 @@ import {
 import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, getDocs } from 'firebase/firestore';
 import './MainDashboard.css';
-import PieChartLocations from './PieChartLocations';
-import PieChartProblems from './PieChartProblem';
+import PieChartLocations from './statistics/PieChartLocations';
+import PieChartProblems from './statistics/PieChartProblem';
 
 // Firebase config and initialization
 const firebaseConfig = {

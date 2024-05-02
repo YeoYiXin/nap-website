@@ -1,3 +1,4 @@
+// Written by Grp B
 import React, { useEffect, useRef } from 'react';
 
 interface Props {
