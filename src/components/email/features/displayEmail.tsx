@@ -283,7 +283,7 @@ const DisplayEmail = ({ selectedEmail }: Props) => {
                     <p className="font-bold">Class</p>
                   </div>
                   <div className="px-5 flex flex-row items-start justify-center">
-                    {selected?.problemClass}
+                    {selectedEmail.problemClass}
                   </div>
                 </div>
 
@@ -292,7 +292,7 @@ const DisplayEmail = ({ selectedEmail }: Props) => {
                     <p className="font-bold">Problem</p>
                   </div>
                   <div className="px-5 flex flex-row items-start justify-center">
-                    {selected?.problemSubClass}
+                    {selectedEmail.problemSubClass}
                   </div>
                 </div>
 
@@ -303,7 +303,7 @@ const DisplayEmail = ({ selectedEmail }: Props) => {
                   <div className="px-2 flex flex-row items-start justify-center">
                     <LuDot className={dotColor} />
 
-                    {selected?.problemPriority}
+                    {selectedEmail.problemPriority}
                   </div>
                 </div>
 

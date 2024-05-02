@@ -6,7 +6,6 @@ import { isPointInPolygon } from 'geolib';
 import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, getDocs } from 'firebase/firestore';
 import { areaPolygons } from './location';
-import HeatMap from 'react-heatmap-grid';
 import './MainDashboard.css';
 
 // Firebase config and initialization
