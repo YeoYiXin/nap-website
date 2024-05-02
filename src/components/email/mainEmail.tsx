@@ -1,6 +1,5 @@
 "use client";
 import React, { useState } from "react";
-// import SearchBox from "./features/searchBox";
 import AssignedToButton from "./buttons/assignedTo";
 import PriorityButton from "./buttons/priority";
 import ProblemClassButton from "./buttons/problemClass";
@@ -180,7 +179,6 @@ const MainEmail = () => {
           {/* Work orders row */}
           <div className="row-span-1 flex flex-row">
             {/* for work orders */}
-
             <h1 className="font-bold text-3xl mb-1">Work Orders</h1>
           </div>
         </div>

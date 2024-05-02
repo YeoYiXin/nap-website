@@ -1,6 +1,5 @@
 import Link from "next/link";
 import React from "react";
-// import "../../../styles/navStyle.css"
 interface Props {
   onClick: () => void;
   isActive: boolean;
@@ -15,9 +14,6 @@ const navDep = ({ onClick, isActive }: Props) => {
       }`}
       onClick={onClick}
     >
-      {/* <a href="" className="no-underline ">
-        Department
-      </a> */}
       <p className="cursor-pointer">Department</p>
     </div>
   );

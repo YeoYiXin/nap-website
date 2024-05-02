@@ -1,7 +1,5 @@
-// "use client";
 import React from "react";
 import { CiSearch } from "react-icons/ci";
-// import { TERipple } from "tw-elements-react";
 
 const searchBox = () => {
   return (

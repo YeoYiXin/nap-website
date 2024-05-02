@@ -1,7 +1,4 @@
-// navEmail.tsx
-import Link from "next/link";
 import React from "react";
-// import "../../../styles/navStyle.css"
 interface Props {
   onClick: () => void;
   isActive: boolean;
@@ -16,9 +13,6 @@ const NavEmail = ({ onClick, isActive }: Props) => {
       }`}
       onClick={onClick}
     >
-      {/* <a href="" className="no-underline ">
-        Email
-      </a> */}
       <p className="cursor-pointer">Email</p>
     </div>
   );

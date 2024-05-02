@@ -1,7 +1,5 @@
-import Link from "next/link";
 import React from "react";
-import Dashboard from "../../dashboard/mainDashboard";
-// import "../../../styles/navStyle.css"
+
 interface Props {
   onClick: () => void;
   isActive: boolean;

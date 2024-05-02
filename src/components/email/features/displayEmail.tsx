@@ -123,8 +123,6 @@ const DisplayEmail = ({ selectedEmail }: Props) => {
     const docSnap = await getDoc(docRef);
 
     if (docSnap.exists()) {
-      // setSubmissionUserEmail(docSnap.data().email);
-
       const userData = docSnap.data();
       if (userData && userData.email) {
         const emailParts = userData.email.split("@");
@@ -236,8 +234,6 @@ const DisplayEmail = ({ selectedEmail }: Props) => {
               </h2>
             </div>
             <div className="flex flex-row-reverse justify-end gap-5 pr-5">
-              {/* edit (problem summarisation) */}
-
               <div className="">
                 <DeleteButton onClick={() => setShowDeleteConfirmation(true)} />
               </div>
@@ -254,17 +250,10 @@ const DisplayEmail = ({ selectedEmail }: Props) => {
             <div className="flex flex-col h-[35%] border-b-2 border-b-gray-400 border-opacity-30 mb-2">
               <div className="mt-2 flex-1 flex flex-col flex-grow px-5 gap-3">
                 <div>
-                  <p className="mt-1 font-bold">
-                    Status{" "}
-                    {/* <span className="text-gray-400 font-normal">
-                      {"("}Click to Update{")"}
-                    </span> */}
-                  </p>
+                  <p className="mt-1 font-bold">Status </p>
                 </div>
                 <div className="grid grid-flow-col-dense grid-cols-8">
                   <div className="col-span-7 flex flex-row flex-grow gap-2">
-                    {/* open, in progress, done */}
-
                     <InProgressButton
                       clicked={() => handleStatusClick("In Progress")}
                       isSelected={stat === "In Progress"}

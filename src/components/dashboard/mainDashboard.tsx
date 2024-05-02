@@ -2,11 +2,8 @@ import React, { useEffect, useState } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line // Added LineChart and Line
 } from 'recharts';
-import { isPointInPolygon } from 'geolib';
 import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, getDocs } from 'firebase/firestore';
-
-import { areaPolygons } from './location';
 import './MainDashboard.css';
 import PieChartLocations from './PieChartLocations';
 import PieChartProblems from './PieChartProblem';
@@ -40,29 +37,9 @@ interface PieLabel {
   percent: number;
 }
 
-interface HeatmapDisplayData {
-  areaName: string;
-  problemCount: number;
-  latitude: number;
-  longitude: number;
-}
-
-
-interface HeatmapPoint {
-  latitude: number;
-  longitude: number;
-  areaName?: string;
-  problemCount: number;
-}
-
 interface ClassData {
   name: string;
   count: number;
-}
-
-interface TransformedData {
-  xLabel: string;
-  yValue: number;
 }
 
  // Mock data for issue reports over a period of a month
