@@ -19,8 +19,6 @@ export default function Home() {
       <div className="bg-white flex min-h-screen" style={{ paddingLeft: '10rem' }}>
         <NavBar onSectionClick={handlePageClick} />
 
-        {/* Main content - statistics first*/}
-
         {selectedPage.toLowerCase() === "email" && (
           <div className="w-full">
             <Email />

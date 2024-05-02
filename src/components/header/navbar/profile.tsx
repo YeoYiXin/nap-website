@@ -1,7 +1,7 @@
 import React from "react";
 import Image from "next/image";
 import UserProfile from "../../../../public/userProfile.png";
-// import "../../../styles/navStyle.css";
+
 const profile = () => {
   return (
     <div className="mt-5 ml-3 flex flex-row items-center">

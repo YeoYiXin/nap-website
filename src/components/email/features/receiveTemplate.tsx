@@ -65,8 +65,6 @@ const Template = ({
     const docSnap = await getDoc(docRef);
 
     if (docSnap.exists()) {
-      // setSubmissionUserEmail(docSnap.data().email);
-
       const userData = docSnap.data();
       if (userData && userData.email) {
         const emailParts = userData.email.split("@");
